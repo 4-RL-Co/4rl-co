@@ -18,11 +18,10 @@ const clarityId = import.meta.env.PUBLIC_CLARITY_ID;
 const isHome = Astro.url.pathname === '/';
 // Per-page canonical / OG url (was hardcoded to the homepage on every page).
 const canonicalURL = site + Astro.url.pathname;
-// Founder / brand social profiles — used for schema.org sameAs (entity linking).
+// Brand social profiles — used for schema.org sameAs (entity linking).
 const social = [
-  'https://www.linkedin.com/in/olegas4real/',
+  'https://www.linkedin.com/company/4rl-co/',
   'https://github.com/olegas4real',
-  'https://instagram.com/olegas4real',
   'https://t.me/olegas4real',
 ];
 // Organization schema (homepage only) — helps search engines model the entity.
