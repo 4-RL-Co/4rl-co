@@ -62,7 +62,7 @@ Measured, not claimed — [PageSpeed Insights](https://pagespeed.web.dev/analysi
 .
 ├── src/
 │   ├── layouts/Base.astro   # head, meta/OG, JSON-LD, CSP fallback, preloader, cursor, reveals
-│   ├── components/          # Nav, Hero, Manifesto, News, Footer
+│   ├── components/          # Nav, Hero, Manifesto, Work, News, Footer
 │   ├── pages/
 │   │   ├── index.astro      # home
 │   │   ├── 404.astro        # branded not-found
