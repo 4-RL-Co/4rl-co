@@ -1,5 +1,5 @@
 # 4/RL Co. — security contact (RFC 9116)
-Contact: mailto:gabriel.oligar@gmail.com
+Contact: mailto:olegas@4real.ventures
 Expires: 2027-07-01T00:00:00.000Z
 Preferred-Languages: en, pt-BR
 Canonical: https://www.4real.ventures/.well-known/security.txt
