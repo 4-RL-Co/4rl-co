@@ -35,6 +35,14 @@ const orgSchema = {
   image: `${site}/og-image.png`,
   description,
   foundingLocation: { '@type': 'Place', name: 'São Paulo, BR' },
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'sales',
+    email: 'olegas@4real.ventures',
+    telephone: '+5511933279420',
+    areaServed: 'BR',
+    availableLanguage: ['Portuguese', 'English'],
+  },
   founder: { '@type': 'Person', name: 'Gabriel Olegário', sameAs: social },
   sameAs: social,
   subOrganization: [
