@@ -6,6 +6,6 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://www.4real.ventures',
   compressHTML: true,
-  build: { inlineStylesheets: 'auto' },
+  build: { inlineStylesheets: 'always' },
   integrations: [sitemap()],
 });
