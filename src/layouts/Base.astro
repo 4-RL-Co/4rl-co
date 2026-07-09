@@ -1,7 +1,6 @@
 ---
 import '../styles/global.css';
 import Analytics from '@vercel/analytics/astro';
-import SpeedInsights from '@vercel/speed-insights/astro';
 
 const {
   title = '4/RL Co. · Independent AI Venture Studio',
@@ -117,9 +116,8 @@ const orgSchema = {
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={`{"token": "${cfToken}"}`}></script>
   )}
 
-  {/* Vercel first-party analytics (pageviews) + Core Web Vitals — served from /_vercel/* */}
+  {/* Vercel first-party analytics (pageviews) — served from /_vercel/insights/* */}
   <Analytics />
-  <SpeedInsights />
 
   <script>
     /* ---- Scroll reveals: never leave content hidden ---- */
