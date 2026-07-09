@@ -1,0 +1,92 @@
+---
+// Top bar with an accessible mobile menu
+---
+<header class="nav" id="nav">
+  <div class="wrap nav__row">
+    <a class="nav__logo" href="/" aria-label="4/RL Co. home">
+      <img class="nav__mark" src="/4rl-mark.svg" alt="" width="20" height="20" />
+      <span class="display">4<span class="slash">/</span>RL</span>
+    </a>
+
+    <button class="nav__toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navPanel">
+      <span></span><span></span>
+    </button>
+
+    <div class="nav__panel" id="navPanel">
+      <nav class="nav__links mono" aria-label="Primary">
+        <a href="/#work">Work</a>
+        <a href="/#news">News</a>
+        <a href="/journal">Journal</a>
+        <a href="/#about">About</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+      <a class="pill nav__cta" href="/#contact">Let's talk <span class="slash">/</span></a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    backdrop-filter:blur(10px);
+    background:linear-gradient(180deg, rgba(10,10,11,.72), rgba(10,10,11,0));
+  }
+  .nav__row{ display:flex; align-items:center; justify-content:space-between; gap:24px; padding-top:18px; padding-bottom:18px; }
+  .nav__logo{ display:inline-flex; align-items:center; gap:10px; font-size:24px; letter-spacing:-.04em; }
+  .nav__mark{ width:20px; height:20px; display:block; }
+
+  .nav__panel{ display:flex; align-items:center; gap:clamp(20px,3vw,44px); }
+  .nav__links{ display:flex; gap:clamp(16px,2.4vw,40px); }
+  .nav__links a{ position:relative; color:var(--ink-muted); transition:color .25s var(--ease); }
+  .nav__links a:hover{ color:var(--ink); }
+  .nav__links a::after{ content:""; position:absolute; left:0; bottom:-6px; height:1px; width:0; background:var(--accent); transition:width .3s var(--ease); }
+  .nav__links a:hover::after{ width:100%; }
+
+  /* hamburger — hidden on desktop */
+  .nav__toggle{
+    display:none; width:44px; height:44px; margin:-10px -8px -10px 0; padding:0;
+    background:none; border:0; cursor:pointer; position:relative; z-index:2;
+  }
+  .nav__toggle span{
+    position:absolute; left:11px; right:11px; height:2px; background:var(--ink);
+    transition:transform .3s var(--ease), opacity .3s var(--ease);
+  }
+  .nav__toggle span:nth-child(1){ top:18px; }
+  .nav__toggle span:nth-child(2){ bottom:18px; }
+  .nav.open .nav__toggle span:nth-child(1){ transform:translateY(5px) rotate(45deg); background:var(--accent); }
+  .nav.open .nav__toggle span:nth-child(2){ transform:translateY(-5px) rotate(-45deg); background:var(--accent); }
+
+  @media (max-width:760px){
+    .nav__toggle{ display:block; }
+    .nav__panel{
+      position:fixed; inset:0; z-index:1;
+      flex-direction:column; align-items:flex-start; justify-content:center;
+      gap:8px; padding:0 var(--pad);
+      background:var(--bg);
+      transform:translateY(-100%); opacity:0; visibility:hidden;
+      transition:transform .4s var(--ease), opacity .3s var(--ease), visibility .4s var(--ease);
+    }
+    .nav.open .nav__panel{ transform:none; opacity:1; visibility:visible; }
+    .nav__links{ flex-direction:column; gap:6px; }
+    .nav__links a{ font-size:clamp(30px,9vw,52px); font-family:var(--font-display); font-weight:700; letter-spacing:-.03em; color:var(--ink); padding:8px 0; text-transform:none; }
+    .nav__links a::after{ display:none; }
+    .nav__cta{ margin-top:22px; }
+  }
+</style>
+
+<script>
+  const nav = document.getElementById('nav');
+  const btn = document.getElementById('navToggle');
+  const panel = document.getElementById('navPanel');
+  if (nav && btn && panel) {
+    const setOpen = (open) => {
+      nav.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+    btn.addEventListener('click', () => setOpen(!nav.classList.contains('open')));
+    panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && nav.classList.contains('open')) setOpen(false); });
+  }
+</script>

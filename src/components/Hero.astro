@@ -1,0 +1,63 @@
+---
+// Full-viewport R/GA-style hero: giant 4-line block + support text bottom-right
+---
+<section class="hero" id="top">
+  <div class="wrap hero__inner">
+    <p class="hero__kicker mono hero-in">Independent AI Venture Studio · São Paulo</p>
+
+    <h1 class="hero__title display hero-in" style="--hd:1">
+      We make the<br />
+      world better<br />
+      with <span class="hero__slash">/</span><span class="hl">AI</span>.<br />
+      For <span class="hl">real</span>.
+    </h1>
+
+    <div class="hero__support hero-in" style="--hd:2">
+      <p class="hero__thesis">
+        We start companies and run them, across influence, education,
+        applied AI and film.
+      </p>
+      <a class="hero__link" href="#work">See the portfolio <span class="arr">↗</span></a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero{ position:relative; }
+  .hero__inner{
+    min-height:100svh;
+    display:flex; flex-direction:column;
+    padding-top:clamp(92px, 11vh, 124px); padding-bottom:clamp(28px,5vh,56px);
+  }
+  .hero__kicker{ margin-bottom:clamp(18px,3vh,36px); }
+
+  .hero__title{
+    text-transform:uppercase;
+    /* large and dominant, but not overwhelming */
+    font-size:clamp(32px, 9.5vw, 156px);
+    letter-spacing:-.05em; line-height:.93;
+  }
+  .hero__slash{ color:var(--accent); display:inline-block; animation:slashPulse 3.2s var(--ease) infinite; }
+
+  /* support text pinned bottom-right, R/GA style */
+  .hero__support{ margin-top:auto; align-self:flex-end; max-width:34ch; text-align:left; }
+  .hero__thesis{ color:var(--ink-muted); font-size:clamp(14px,1.35vw,18px); }
+  .hero__link{
+    display:inline-block; margin-top:16px; font-family:var(--font-mono);
+    font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink);
+    border-bottom:1px solid var(--line); padding-bottom:4px; transition:color .25s var(--ease), border-color .25s var(--ease);
+  }
+  .hero__link:hover{ color:var(--accent); border-color:var(--accent); }
+
+  @media (max-width:720px){
+    .hero__support{ align-self:flex-start; max-width:38ch; }
+  }
+
+  /* ---- fast hero entrance (never blank; ends visible) ---- */
+  @keyframes heroIn{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+  .hero-in{ animation:heroIn .42s var(--ease) both; animation-delay:calc(var(--hd, 0) * .07s); }
+  @media (prefers-reduced-motion: reduce){
+    .hero-in{ animation:none; }
+    .hero__slash{ animation:none; }
+  }
+</style>

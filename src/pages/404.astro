@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+---
+<Base title="404 · 4/RL Co." description="Page not found.">
+  <Nav />
+  <main class="nf">
+    <div class="wrap nf__inner">
+      <p class="mono nf__kicker reveal">4/RL Co. <span class="slash">/</span> Independent AI Venture Studio</p>
+
+      <h1 class="nf__title display reveal" data-d="1">
+        404 <span class="slash">/</span><br />
+        Lost the <span class="hl">thread</span>.
+      </h1>
+
+      <div class="nf__actions reveal" data-d="2">
+        <a class="pill pill--solid" href="/">Back to real <span class="slash">/</span></a>
+        <nav class="mono nf__nav" aria-label="Elsewhere">
+          <a href="/#work">Work</a>
+          <a href="/journal">Journal</a>
+          <a href="/#contact">Contact</a>
+        </nav>
+      </div>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .nf{ min-height:100svh; display:flex; align-items:center; }
+  .nf__inner{ width:100%; padding-top:14vh; padding-bottom:10vh; }
+  .nf__kicker{ margin-bottom:clamp(24px,4vh,44px); }
+  .nf__title{
+    text-transform:uppercase; font-size:clamp(46px,10vw,150px);
+    letter-spacing:-.05em; line-height:.9; margin-bottom:clamp(36px,5vw,64px);
+  }
+  .nf__actions{ display:flex; align-items:center; gap:clamp(20px,3vw,48px); flex-wrap:wrap; }
+  .nf__nav{ display:flex; gap:clamp(16px,2vw,32px); }
+  .nf__nav a{ color:var(--ink-muted); transition:color .25s var(--ease); }
+  .nf__nav a:hover{ color:var(--accent); }
+</style>

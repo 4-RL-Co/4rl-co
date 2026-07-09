@@ -1,0 +1,6 @@
+# 4/RL Co. — security contact (RFC 9116)
+Contact: mailto:gabriel.oligar@gmail.com
+Expires: 2027-07-01T00:00:00.000Z
+Preferred-Languages: en, pt-BR
+# Update the domain below once the final 4/RL domain is set:
+Canonical: https://gabrielolegario.com/.well-known/security.txt

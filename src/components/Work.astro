@@ -1,0 +1,53 @@
+---
+import { ventures } from '../data/ventures.js';
+---
+<section class="work" id="work">
+  <div class="wrap">
+    <p class="seclabel reveal"><span class="n">01</span> <span class="slash">/</span> Work · Companies</p>
+
+    <ul class="work__list">
+      {ventures.map((v) => (
+        <li class="reveal">
+          <a class="work__row row" href={v.href} target="_blank" rel="noopener">
+            <span class="work__idx mono">{v.idx}</span>
+            <span class="work__main">
+              <span class="work__name display">{v.name}</span>
+              <span class="work__line">{v.line}</span>
+            </span>
+            <span class="work__sector mono">{v.sector}</span>
+            <span class="work__arr arr" aria-hidden="true">↗</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .work{ padding-top:clamp(72px,10vh,130px); padding-bottom:clamp(48px,7vh,90px); }
+  .work__list{ list-style:none; }
+  .work__row{
+    display:grid; grid-template-columns:auto 1fr auto auto;
+    align-items:center; gap:clamp(16px,3vw,48px);
+    padding:clamp(20px,3vw,38px) 0; border-top:1px solid var(--line);
+    transition:padding-left .4s var(--ease);
+  }
+  .work__list li:last-child .work__row{ border-bottom:1px solid var(--line); }
+  .work__row:hover{ padding-left:clamp(8px,1.4vw,22px); }
+
+  .work__idx{ color:var(--ink-muted); align-self:start; padding-top:.7em; }
+  .work__name{
+    font-size:clamp(32px,6vw,96px); letter-spacing:-.04em; line-height:.94;
+    text-transform:uppercase; transition:color .3s var(--ease);
+  }
+  .work__row:hover .work__name{ color:var(--accent); }
+  .work__line{ display:block; color:var(--ink-muted); margin-top:12px; max-width:52ch; font-size:clamp(13px,1.3vw,16px); }
+  .work__sector{ white-space:nowrap; color:var(--ink-muted); }
+  .work__row:hover .work__sector{ color:var(--ink); }
+  .work__arr{ font-size:22px; color:var(--accent); }
+
+  @media (max-width:760px){
+    .work__row{ grid-template-columns:auto 1fr auto; gap:16px; }
+    .work__sector{ display:none; }
+  }
+</style>

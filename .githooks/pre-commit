@@ -1,0 +1,37 @@
+#!/bin/sh
+# ---------------------------------------------------------------------------
+# Secret guard — refuses a commit that would leak a secret.
+# Enable once per clone:   git config core.hooksPath .githooks
+# Bypass in a real emergency: git commit --no-verify   (avoid this)
+# ---------------------------------------------------------------------------
+set -e
+fail=0
+
+# 1) Never commit a real env file (only .env.example is allowed).
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+for f in $staged; do
+  case "$f" in
+    .env.example) : ;;
+    .env|.env.*|*/.env|*/.env.*)
+      echo "✖ BLOCKED: '$f' looks like an env file with real values. It must stay local."
+      fail=1 ;;
+  esac
+done
+
+# 2) Scan staged content for high-signal secret patterns.
+patterns='BEGIN [A-Z ]*PRIVATE KEY|AKIA[0-9A-Z]{16}|gh[opsr]_[A-Za-z0-9]{30,}|sk-[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|data-cf-beacon=[^$]*[0-9a-f]{24}'
+# added lines only; -e guards against patterns that start with a dash
+hits=$(git diff --cached -U0 --diff-filter=ACM | grep -E "^\+" | grep -EI -e "$patterns" || true)
+if [ -n "$hits" ]; then
+  echo "✖ BLOCKED: staged changes contain what looks like a secret:"
+  echo "$hits" | sed 's/^/    /'
+  echo "  Move it to .env (git-ignored) and reference it via import.meta.env.*"
+  fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "Commit aborted by secret guard. Nothing was committed."
+  exit 1
+fi
+exit 0

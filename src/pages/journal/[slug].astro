@@ -1,0 +1,153 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { articles } from '../../data/journal.js';
+
+export function getStaticPaths() {
+  return articles.map((a) => ({ params: { slug: a.slug }, props: { article: a } }));
+}
+const { article } = Astro.props;
+
+// auto reading time (~200 wpm)
+const words = article.blocks.map((b) => b.html || '').join(' ').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+const read = Math.max(1, Math.round(words / 200)) + ' min';
+
+// share links
+const site = 'https://gabrielolegario.com';
+const url = `${site}/journal/${article.slug}/`;
+const e = encodeURIComponent;
+const shareX = `https://twitter.com/intent/tweet?text=${e(article.title)}&url=${e(url)}`;
+const shareLI = `https://www.linkedin.com/sharing/share-offsite/?url=${e(url)}`;
+const shareMail = `mailto:?subject=${e(article.title)}&body=${e(url)}`;
+---
+<Base title={`${article.title} · 4/RL Co. Journal`} description={article.dek}>
+  <Nav />
+  <div class="art-progress" id="artProgress" aria-hidden="true"></div>
+
+  <main class="art">
+    <div class="wrap">
+      <header class="art__head">
+        <p class="mono art__kicker reveal">Journal <span class="slash">/</span> Manifesto</p>
+        <h1 class="art__title display reveal" data-d="1">{article.title}</h1>
+        <p class="art__dek reveal" data-d="1">{article.dek}</p>
+        <div class="art__byline mono reveal" data-d="2">
+          <span class="art__by-name">{article.author}</span>
+          <span class="art__by-date">{article.dateLabel} · {read}</span>
+        </div>
+      </header>
+
+      <div class="art__content">
+        <aside class="art__aside reveal">
+          <p class="mono art__aside-label">Share</p>
+          <nav class="mono art__share">
+            <a href={shareX} target="_blank" rel="noopener">X</a>
+            <a href={shareLI} target="_blank" rel="noopener">LinkedIn</a>
+            <a href={shareMail}>Email</a>
+          </nav>
+        </aside>
+
+        <article class="art__body">
+          {article.blocks.map((b) =>
+            b.t === 'p' ? (
+              <p class={'art__p reveal' + (b.drop ? ' has-drop' : '')} set:html={b.html} />
+            ) : b.t === 'pull' ? (
+              <p class={'art__pull display reveal' + (b.lime ? ' is-lime' : '')} set:html={b.html} />
+            ) : b.t === 'divider' ? (
+              <div class="art__div reveal" aria-hidden="true"><span class="slash">/</span></div>
+            ) : b.t === 'signoff' ? (
+              <p class="art__signoff display reveal" set:html={b.html} />
+            ) : null
+          )}
+        </article>
+      </div>
+
+      <footer class="art__foot reveal">
+        <a class="mono art__back" href="/journal">← Journal</a>
+        <img class="art__stamp" src="/4rl-mark.svg" alt="" width="20" height="20" />
+      </footer>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .art-progress{ position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:200; transition:width .1s linear; }
+
+  .art{ padding-bottom:16vh; }
+
+  /* full-viewport R/GA-style article header */
+  .art__head{
+    min-height:86svh; display:flex; flex-direction:column;
+    padding-top:clamp(100px,16vh,190px); padding-bottom:clamp(24px,4vh,48px);
+  }
+  .art__kicker{ margin-bottom:clamp(20px,4vh,44px); }
+  .art__title{ text-transform:uppercase; font-size:clamp(46px,10.5vw,148px); letter-spacing:-.05em; line-height:.9; }
+  .art__dek{ margin-top:22px; color:var(--ink-muted); font-size:clamp(16px,1.7vw,21px); max-width:44ch; }
+  .art__byline{
+    margin-top:auto; display:flex; align-items:flex-end; justify-content:space-between;
+    gap:16px 32px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:24px;
+  }
+  .art__by-name{ color:var(--ink); }
+  .art__by-date{ color:var(--ink-muted); }
+
+  /* two-column body: sticky share rail (left) + offset text column (right) */
+  .art__content{
+    display:grid; grid-template-columns:180px minmax(0, 700px);
+    column-gap:clamp(28px,6vw,96px);
+    margin-top:clamp(56px,8vh,100px);
+  }
+  .art__aside{ position:sticky; top:120px; align-self:start; }
+  .art__aside-label{ color:var(--ink-muted); margin-bottom:16px; }
+  .art__share{ display:flex; flex-direction:column; gap:11px; }
+  .art__share a{ color:var(--ink-muted); transition:color .25s var(--ease); }
+  .art__share a:hover{ color:var(--accent); }
+
+  .art__body{ max-width:700px; }
+  .art__p{ font-size:clamp(19px,1.5vw,23px); line-height:1.62; color:var(--ink); margin:0 0 1.4em; }
+  .art__p.has-drop::first-letter{
+    font-family:var(--font-display); font-weight:700; color:var(--accent);
+    font-size:3.2em; line-height:.72; float:left; margin:.06em .12em 0 0;
+  }
+  .art__pull{
+    font-size:clamp(28px,3.8vw,52px); font-weight:700; letter-spacing:-.03em; line-height:1.04;
+    color:var(--ink); margin:clamp(40px,6vh,72px) 0;
+  }
+  .art__pull.is-lime{ color:var(--accent); }
+  .art__div{ margin:clamp(32px,5vh,56px) 0; }
+  .art__div .slash{ font-size:30px; }
+  .art__signoff{
+    margin:clamp(48px,8vh,92px) 0 0; text-transform:uppercase;
+    font-size:clamp(30px,5vw,68px); font-weight:800; letter-spacing:-.04em; line-height:.98;
+  }
+
+  .art__foot{
+    max-width:1020px; margin:clamp(64px,9vh,110px) 0 0; padding-top:26px; border-top:1px solid var(--line);
+    display:flex; align-items:center; gap:20px;
+  }
+  .art__back{ color:var(--ink-muted); }
+  .art__back:hover{ color:var(--accent); }
+  .art__stamp{ width:20px; height:20px; margin-left:auto; }
+
+  @media (max-width:860px){
+    .art__content{ grid-template-columns:1fr; row-gap:28px; }
+    .art__aside{ position:static; }
+    .art__share{ flex-direction:row; gap:22px; }
+    .art__body, .art__foot{ max-width:none; }
+    .art__p.has-drop::first-letter{ font-size:2.9em; }
+  }
+  @media (prefers-reduced-motion: reduce){ .art-progress{ display:none; } }
+</style>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const bar = document.getElementById('artProgress');
+  if (bar && !reduce) {
+    const upd = () => {
+      const el = document.documentElement;
+      const max = el.scrollHeight - el.clientHeight;
+      bar.style.width = (max > 0 ? (el.scrollTop / max) * 100 : 0) + '%';
+    };
+    addEventListener('scroll', upd, { passive: true });
+    addEventListener('resize', upd, { passive: true });
+    upd();
+  } else if (bar) { bar.style.display = 'none'; }
+</script>

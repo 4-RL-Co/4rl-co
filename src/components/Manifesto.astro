@@ -1,0 +1,54 @@
+---
+// Thesis + who's behind it
+---
+<section class="mf" id="about">
+  <div class="wrap">
+    <p class="seclabel reveal"><span class="n">03</span> <span class="slash">/</span> Manifesto</p>
+
+    <h2 class="mf__title display reveal" data-d="1">
+      <span class="mf__lede">Everything we build passes one filter: it's <span class="hl">real</span> and it <span class="hl">improves</span> something.</span>
+      <span class="mf__punch">AI is the tool <span class="slash">/</span> not the hype.</span>
+    </h2>
+
+    <div class="mf__grid">
+      <div class="reveal" data-d="1">
+        <p class="mono mf__label">Principle</p>
+        <p class="mf__body">
+          <span class="hl">We don't sell a service</span>. We own our ventures
+          and stay for the long haul.
+        </p>
+      </div>
+      <div class="reveal" data-d="2">
+        <p class="mono mf__label">Who's behind it</p>
+        <p class="mf__body">
+          <strong>Gabriel Olegário</strong>, advertiser and builder.
+          He sets the direction and ships the work, from São Paulo.
+        </p>
+        <a class="pill mf__cta" href="#contact">Get in touch <span class="arr">↗</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .mf{ padding-top:clamp(72px,10vh,130px); padding-bottom:clamp(64px,9vh,110px); }
+  .mf__title{
+    text-transform:uppercase;
+    font-size:clamp(23px,3.7vw,58px); letter-spacing:-.03em; line-height:1.04;
+    max-width:31ch;                 /* shared measure: both blocks align */
+    margin-bottom:clamp(48px,7vw,96px);
+  }
+  .mf__lede{ display:block; font-weight:500; }              /* lighter, fills the measure */
+  .mf__punch{ display:block; font-weight:700; white-space:nowrap; margin-top:.42em; }  /* bold punch, one line */
+  @media (max-width:640px){ .mf__punch{ white-space:normal; } }   /* wrap on small screens */
+  .mf__grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,80px);
+    border-top:1px solid var(--line); padding-top:clamp(28px,4vw,48px);
+  }
+  .mf__label{ margin-bottom:14px; }
+  .mf__body{ color:var(--ink-muted); font-size:clamp(15px,1.5vw,19px); max-width:46ch; }
+  .mf__body strong{ color:var(--ink); font-weight:600; }
+  .mf__jp{ color:var(--accent); }
+  .mf__cta{ margin-top:26px; }
+  @media (max-width:760px){ .mf__grid{ grid-template-columns:1fr; } }
+</style>

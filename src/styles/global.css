@@ -1,0 +1,173 @@
+/* =========================================================
+   4/RL — design system
+   Dark premium + surgical electric lime. Editorial grid.
+   ========================================================= */
+
+/* ---- Fonts (self-hosted via Fontsource, font-display: swap) ---- */
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource/space-mono/400.css';
+@import '@fontsource/space-mono/700.css';
+@import '@fontsource-variable/inter';
+
+:root{
+  --bg:#0A0A0B;
+  --bg-elev:#131315;
+  --ink:#F2F2F3;
+  --ink-muted:#8A8A90;
+  --accent:#C6FF3A;      /* electric lime */
+  --accent-deep:#AEE62E;
+  --line:#232327;
+
+  --font-display:"Space Grotesk Variable", system-ui, sans-serif;
+  --font-mono:"Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-body:"Inter Variable", system-ui, sans-serif;
+
+  --maxw:1680px;
+  --pad:clamp(20px, 4.5vw, 80px);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+/* ---- reset ---- */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+html{ background:var(--bg); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; scroll-behavior:smooth; }
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.5;
+  overflow-x:hidden;
+  font-size:16px;
+}
+a{ color:inherit; text-decoration:none; }
+img,video{ display:block; max-width:100%; }
+::selection{ background:var(--accent); color:#0A0A0B; }
+
+/* keyboard focus: lime outline (mouse clicks stay clean) */
+:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:2px; }
+button{ font:inherit; }
+
+/* ---- shared primitives ---- */
+/* generic "/" (labels, marquee, manifesto, the "." dot): trim glyph height */
+.slash{ color:var(--accent); font-style:normal; display:inline-block; transform:scaleY(.82); transform-origin:center; }
+.hl{ color:var(--accent); }
+
+/* wordmark "/" : drawn geometrically so top = cap height and bottom = baseline,
+   forming a perfect rectangle-height slash aligned with 4 / R / L */
+.nav__logo .slash, .foot__logo .slash{
+  color:transparent; transform:none; overflow:hidden; position:relative;
+  width:.5em; height:.7em; height:1cap;   /* 1cap = exact cap height (em fallback) */
+  vertical-align:baseline;
+}
+.nav__logo .slash::before, .foot__logo .slash::before{
+  content:""; position:absolute; inset:0; background:var(--accent);
+  clip-path:polygon(60% 0, 100% 0, 40% 100%, 0 100%);   /* the slash bar/angle */
+}
+
+.wrap{ max-width:var(--maxw); margin:0 auto; padding-left:var(--pad); padding-right:var(--pad); }
+
+.mono{
+  font-family:var(--font-mono);
+  font-size:clamp(10px,1vw,12px);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+}
+
+.display{
+  font-family:var(--font-display);
+  font-weight:700;
+  letter-spacing:-.03em;
+  line-height:.92;
+}
+
+/* section label like "01 / WORK" */
+.seclabel{
+  font-family:var(--font-mono);
+  font-size:clamp(11px,1.1vw,13px);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+  display:flex; align-items:center; gap:12px;
+  padding-bottom:24px; margin-bottom:clamp(32px,5vw,72px);
+  border-bottom:1px solid var(--line);
+}
+.seclabel .n{ color:var(--accent); }
+
+/* thin rule */
+.rule{ border:0; border-top:1px solid var(--line); }
+
+/* buttons / pills */
+.pill{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+  padding:11px 18px; border-radius:100px; border:1px solid var(--line);
+  color:var(--ink); transition:border-color .3s var(--ease), color .3s var(--ease), background .3s var(--ease);
+}
+.pill:hover{ border-color:var(--accent); color:var(--accent); }
+.pill--solid{ background:var(--accent); color:#0A0A0B; border-color:var(--accent); }
+.pill--solid:hover{ background:var(--accent-deep); color:#0A0A0B; border-color:var(--accent-deep); }
+
+/* arrow that nudges */
+.arr{ display:inline-block; transition:transform .3s var(--ease); }
+a:hover .arr, .row:hover .arr{ transform:translate(3px,-3px); }
+
+/* =========================================================
+   MOTION — scroll reveal + marquee (respect reduced motion)
+   ========================================================= */
+/* Visible by default -> never a blank/void if JS or IO fails.
+   JS adds html.js to opt into the hidden->reveal animation. */
+.reveal{ opacity:1; transform:none; transition:opacity .55s var(--ease), transform .55s var(--ease); }
+html.js .reveal{ opacity:0; transform:translateY(20px); }
+html.js .reveal.in{ opacity:1; transform:none; }
+.reveal[data-d="1"]{ transition-delay:.05s; }
+.reveal[data-d="2"]{ transition-delay:.10s; }
+.reveal[data-d="3"]{ transition-delay:.15s; }
+
+@keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+.marquee{ overflow:hidden; white-space:nowrap; }
+.marquee__track{ display:inline-flex; gap:0; animation:marquee 28s linear infinite; will-change:transform; }
+.marquee:hover .marquee__track{ animation-play-state:paused; }
+
+/* the animated "/" motif */
+@keyframes slashPulse{ 0%,100%{ opacity:.85; transform:skewX(-8deg) translateY(0); } 50%{ opacity:1; transform:skewX(-8deg) translateY(-3px); } }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  html.js .reveal, .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
+  .marquee__track{ animation:none; }
+  .cursor,.cursor-dot{ display:none !important; }
+  html.hide-cursor, html.hide-cursor *{ cursor:auto !important; }
+}
+
+/* =========================================================
+   PRELOADER (4/RL mark on dark; auto-hides even without JS)
+   ========================================================= */
+.preloader{
+  position:fixed; inset:0; z-index:9999; display:grid; place-items:center;
+  background:var(--bg); will-change:transform,opacity;
+  animation:preFallback .5s var(--ease) 1.2s forwards;   /* no-JS safety: auto-hide */
+}
+.preloader img{ width:60px; height:60px; animation:markPulse 1.4s var(--ease) infinite; }
+.preloader.wipe{ animation:none; transform:translateY(-100%) skewY(-6deg); transition:transform .46s cubic-bezier(.7,0,.28,1); }
+.preloader.fade{ animation:none; opacity:0; transition:opacity .15s linear; }
+html.preloaded .preloader{ display:none; }   /* skip on later navigations (once per session) */
+@keyframes preFallback{ to{ opacity:0; visibility:hidden; } }
+@keyframes markPulse{ 0%,100%{ transform:scale(1); opacity:.85; } 50%{ transform:scale(1.06); opacity:1; } }
+@media (prefers-reduced-motion: reduce){ .preloader{ display:none; animation:none; } }
+
+/* =========================================================
+   CUSTOM CURSOR (desktop pointer only)
+   ========================================================= */
+.cursor,.cursor-dot{ position:fixed; top:0; left:0; z-index:9999; pointer-events:none; border-radius:50%; }
+.cursor{
+  width:36px; height:36px; border:1px solid var(--accent);
+  transform:translate(-50%,-50%);
+  transition:width .25s var(--ease), height .25s var(--ease), background .25s var(--ease), opacity .3s var(--ease);
+  mix-blend-mode:difference; opacity:0;
+}
+.cursor-dot{ width:5px; height:5px; background:var(--accent); transform:translate(-50%,-50%); opacity:0; }
+.cursor.is-hover{ width:64px; height:64px; background:rgba(198,255,58,.12); }
+@media (hover:none),(pointer:coarse){ .cursor,.cursor-dot{ display:none; } }
+
+/* When the custom cursor is active, hide the OS cursor entirely */
+html.hide-cursor, html.hide-cursor a, html.hide-cursor button, html.hide-cursor [data-cursor]{ cursor:none; }

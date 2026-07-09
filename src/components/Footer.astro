@@ -1,0 +1,63 @@
+---
+const email = 'gabriel.oligar@gmail.com';
+const socials = [
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/olegas4real/' },
+  { label: 'GitHub', href: 'https://github.com/olegas4real' },
+  { label: 'Instagram', href: 'https://instagram.com/olegas4real' },
+  { label: 'Telegram', href: 'https://t.me/olegas4real' },
+];
+const year = 2026;
+---
+<section class="contact" id="contact">
+  <div class="wrap">
+    <p class="seclabel reveal"><span class="n">04</span> <span class="slash">/</span> Contact</p>
+
+    <a class="contact__big display reveal" href={'mailto:' + email}>
+      Let's build<br />something <span class="hl">real</span><span class="slash">.</span>
+    </a>
+
+    <div class="contact__grid reveal" data-d="1">
+      <a class="contact__mail" href={'mailto:' + email}>{email} <span class="arr">↗</span></a>
+      <nav class="contact__socials mono" aria-label="Social">
+        {socials.map((s) => (<a href={s.href} target="_blank" rel="noopener">{s.label}</a>))}
+      </nav>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="wrap foot__row">
+      <span class="foot__brand">
+        <img class="foot__mark" src="/4rl-mark.svg" alt="" width="17" height="17" />
+        <span class="foot__logo display">4<span class="slash">/</span>RL</span>
+      </span>
+      <span class="mono">São Paulo, BR</span>
+      <span class="mono">© {year} 4/RL Co.</span>
+    </div>
+  </footer>
+</section>
+
+<style>
+  .contact{ padding-top:clamp(64px,9vh,120px); }
+  .contact__big{
+    display:block; text-transform:uppercase;
+    font-size:clamp(44px,10vw,180px); letter-spacing:-.045em; line-height:.9;
+    max-width:13ch;
+    margin-bottom:clamp(44px,6vw,88px); transition:opacity .3s var(--ease);
+  }
+  .contact__big:hover{ opacity:.75; }
+  .contact__grid{
+    display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;
+    border-top:1px solid var(--line); padding:28px 0;
+  }
+  .contact__mail{ font-family:var(--font-mono); font-size:clamp(14px,1.6vw,20px); }
+  .contact__mail:hover{ color:var(--accent); }
+  .contact__socials{ display:flex; gap:clamp(14px,2vw,32px); flex-wrap:wrap; }
+  .contact__socials a{ color:var(--ink-muted); transition:color .25s var(--ease); }
+  .contact__socials a:hover{ color:var(--accent); }
+
+  .foot{ border-top:1px solid var(--line); }
+  .foot__row{ display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; padding-top:44px; padding-bottom:80px; }
+  .foot__brand{ display:inline-flex; align-items:center; gap:10px; }
+  .foot__mark{ width:17px; height:17px; display:block; }
+  .foot__logo{ font-size:20px; }
+</style>

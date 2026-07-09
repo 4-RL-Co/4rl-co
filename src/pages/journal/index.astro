@@ -1,0 +1,74 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { articles } from '../../data/journal.js';
+---
+<Base title="Journal · 4/RL Co." description="Writing from 4/RL Co.: notes and ideas on building AI ventures.">
+  <Nav />
+  <main class="jrn">
+    <div class="wrap">
+      <p class="seclabel reveal"><span class="n slash">/</span> Journal</p>
+
+      {articles.length === 0 ? (
+        <div class="jrn__empty reveal" data-d="1">
+          <h1 class="jrn__h display">Coming <span class="slash">/</span> soon.</h1>
+          <p class="jrn__sub">Notes and ideas, written here natively. First entries on the way.</p>
+          <a class="pill" href="/">Back home <span class="arr">↗</span></a>
+        </div>
+      ) : (
+        <>
+          <h1 class="jrn__h display reveal" data-d="1">Thinking <span class="slash">/</span> in public.</h1>
+          <ul class="jrn__list">
+            {articles.map((a) => (
+              <li class="reveal">
+                <a class="jrn__card" href={`/journal/${a.slug}`}>
+                  <span class={'jrn__cover' + (a.cover ? '' : ' is-fallback')}>
+                    {a.cover
+                      ? <img src={a.cover} alt="" loading="lazy" />
+                      : <span class="jrn__cover-title display">{a.title}</span>}
+                  </span>
+                  <span class="jrn__meta">
+                    <span class="jrn__date mono">{a.date}</span>
+                    <span class="jrn__title display">{a.title}</span>
+                    <span class="jrn__ex">{a.excerpt}</span>
+                    <span class="jrn__go mono">Read <span class="arr">↗</span></span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  </main>
+</Base>
+
+<style>
+  .jrn{ padding-top:22vh; padding-bottom:16vh; min-height:82svh; }
+  .jrn__h{ font-size:clamp(40px,8vw,120px); text-transform:uppercase; letter-spacing:-.04em; line-height:.93; }
+
+  /* coming-soon empty state */
+  .jrn__empty .jrn__h{ margin-bottom:24px; }
+  .jrn__sub{ color:var(--ink-muted); max-width:44ch; margin-bottom:32px; font-size:clamp(15px,1.5vw,19px); }
+
+  /* article list with cover */
+  .jrn__list{ list-style:none; margin-top:clamp(40px,6vw,80px); display:grid; gap:clamp(28px,4vw,56px); }
+  .jrn__card{ display:grid; grid-template-columns:minmax(240px,38%) 1fr; gap:clamp(20px,3vw,44px); align-items:center; }
+  .jrn__cover{
+    aspect-ratio:16/9; border-radius:12px; overflow:hidden; border:1px solid var(--line);
+    background:var(--bg-elev);
+  }
+  .jrn__cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+  /* dark-card fallback only when there is no cover image */
+  .jrn__cover.is-fallback{
+    display:flex; align-items:flex-end; padding:18px;
+    background:radial-gradient(120% 100% at 80% 15%, rgba(198,255,58,.12), transparent 60%), var(--bg-elev);
+  }
+  .jrn__cover.is-fallback .jrn__cover-title{ font-size:clamp(20px,2.4vw,32px); letter-spacing:-.03em; color:var(--ink); }
+  .jrn__title{ font-size:clamp(24px,3vw,44px); letter-spacing:-.03em; transition:color .3s var(--ease); }
+  .jrn__card:hover .jrn__title{ color:var(--accent); }
+  .jrn__date{ color:var(--ink-muted); display:block; margin-bottom:10px; }
+  .jrn__ex{ display:block; color:var(--ink-muted); margin-top:12px; max-width:56ch; }
+  .jrn__go{ display:inline-block; margin-top:16px; color:var(--accent); }
+  @media (max-width:720px){ .jrn__card{ grid-template-columns:1fr; } }
+</style>

@@ -1,0 +1,130 @@
+---
+import '../styles/global.css';
+
+const {
+  title = '4/RL Co. · Independent AI Venture Studio',
+  description = 'We improve the world with AI. For real. An independent AI venture studio building and operating ventures across influence, science, applied AI and cinema.',
+  twitterDesc = 'We improve the world with AI. For real.',
+} = Astro.props;
+// SITE_URL — set this to the final 4/RL domain (used for absolute OG/Twitter image URLs).
+const site = 'https://gabrielolegario.com';
+// Public Cloudflare Web Analytics beacon token (kept in an env var, not in source).
+const cfToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  {/* CSP fallback for hosts that can't set headers (e.g. GitHub Pages). Prod only,
+     so it doesn't interfere with the dev server's HMR websocket. On Vercel/Netlify
+     the header version in vercel.json / _headers also applies. */}
+  {import.meta.env.PROD && (
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"
+    />
+  )}
+  <!-- before-paint flags: reveal animation opt-in + preloader once-per-session -->
+  <script is:inline>
+    (function () {
+      var h = document.documentElement;
+      try { if (!matchMedia('(prefers-reduced-motion: reduce)').matches) h.classList.add('js'); } catch (e) {}
+      try { if (sessionStorage.getItem('4rl_pre')) h.classList.add('preloaded'); } catch (e) {}
+    })();
+  </script>
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#0A0A0B" />
+  <link rel="canonical" href={site + '/'} />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/4rl-favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/favicon-180.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="4/RL Co." />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={site + '/'} />
+  <meta property="og:image" content={site + '/og-image.png'} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={twitterDesc} />
+  <meta name="twitter:image" content={site + '/og-image.png'} />
+</head>
+<body>
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <img src="/4rl-mark.svg" alt="" width="60" height="60" />
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+  <slot />
+
+  {cfToken && (
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={`{"token": "${cfToken}"}`}></script>
+  )}
+
+  <script>
+    /* ---- Scroll reveals: never leave content hidden ---- */
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const items = Array.from(document.querySelectorAll('.reveal'));
+    const showAll = () => items.forEach((el) => el.classList.add('in'));
+    if (reduce || !('IntersectionObserver' in window)) {
+      showAll();
+    } else {
+      const vh = () => window.innerHeight || document.documentElement.clientHeight;
+      // reveal anything already in view immediately (fast, no wait)
+      items.forEach((el) => { const r = el.getBoundingClientRect(); if (r.top < vh() * 0.92) el.classList.add('in'); });
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0, rootMargin: '0px 0px -6% 0px' });
+      items.forEach((el) => { if (!el.classList.contains('in')) io.observe(el); });
+      // safety net: nothing stays hidden longer than 1.2s
+      setTimeout(showAll, 1200);
+    }
+
+    /* ---- Preloader: mark hold, then a "/" wipe. Once per session. Non-blocking. ---- */
+    const pre = document.getElementById('preloader');
+    if (pre) {
+      if (document.documentElement.classList.contains('preloaded')) {
+        pre.remove();                              // already shown this session
+      } else {
+        try { sessionStorage.setItem('4rl_pre', '1'); } catch (e) {}
+        const gone = () => pre.remove();
+        if (reduce) { pre.classList.add('fade'); setTimeout(gone, 160); }
+        else { setTimeout(() => { pre.classList.add('wipe'); setTimeout(gone, 480); }, 240); }
+      }
+    }
+
+    /* ---- Custom cursor (desktop pointer only) ---- */
+    const fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+    if (fine && !reduce) {
+      document.documentElement.classList.add('hide-cursor'); /* hide OS cursor */
+      const c = document.getElementById('cursor');
+      const d = document.getElementById('cursorDot');
+      let cx = innerWidth / 2, cy = innerHeight / 2, dx = cx, dy = cy;
+      addEventListener('pointermove', (e) => {
+        cx = e.clientX; cy = e.clientY;
+        d.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
+        c.style.opacity = '1'; d.style.opacity = '1';
+      }, { passive: true });
+      (function loop() {
+        dx += (cx - dx) * 0.18; dy += (cy - dy) * 0.18;
+        c.style.transform = `translate(${dx}px,${dy}px) translate(-50%,-50%)`;
+        requestAnimationFrame(loop);
+      })();
+      const hover = (on) => () => c.classList.toggle('is-hover', on);
+      document.querySelectorAll('a,button,[data-cursor]').forEach((el) => {
+        el.addEventListener('pointerenter', hover(true));
+        el.addEventListener('pointerleave', hover(false));
+      });
+    }
+  </script>
+</body>
+</html>
