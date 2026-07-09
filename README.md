@@ -2,7 +2,7 @@
 
 **Independent AI venture studio.** We start companies and run them — across influence, education, applied AI, and film. The tool is AI; the bar is: it's real and it improves something.
 
-**Live:** _(coming soon — deployed on Vercel)_
+**Live:** [www.4real.ventures](https://www.4real.ventures/)
 
 ![4/RL Co.](public/og-image.png)
 

@@ -13,7 +13,7 @@ const words = article.blocks.map((b) => b.html || '').join(' ').replace(/<[^>]+>
 const read = Math.max(1, Math.round(words / 200)) + ' min';
 
 // share links
-const site = 'https://gabrielolegario.com';
+const site = 'https://www.4real.ventures';
 const url = `${site}/journal/${article.slug}/`;
 const e = encodeURIComponent;
 const shareX = `https://twitter.com/intent/tweet?text=${e(article.title)}&url=${e(url)}`;
