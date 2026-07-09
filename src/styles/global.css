@@ -9,6 +9,19 @@
 @import '@fontsource/space-mono/700.css';
 @import '@fontsource-variable/inter';
 
+/* Metric-matched fallbacks (values generated from the real font metrics) so the
+   system font occupies the exact same space until the webfont loads → no CLS on swap. */
+@font-face{
+  font-family:"Space Grotesk Variable fallback";
+  src:local("Arial");
+  size-adjust:109.4659%; ascent-override:89.891%; descent-override:26.675%; line-gap-override:0%;
+}
+@font-face{
+  font-family:"Inter Variable fallback";
+  src:local("Arial");
+  size-adjust:107.1194%; ascent-override:90.4365%; descent-override:22.518%; line-gap-override:0%;
+}
+
 :root{
   --bg:#0A0A0B;
   --bg-elev:#131315;
@@ -18,9 +31,9 @@
   --accent-deep:#AEE62E;
   --line:#232327;
 
-  --font-display:"Space Grotesk Variable", system-ui, sans-serif;
+  --font-display:"Space Grotesk Variable", "Space Grotesk Variable fallback", system-ui, sans-serif;
   --font-mono:"Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-body:"Inter Variable", system-ui, sans-serif;
+  --font-body:"Inter Variable", "Inter Variable fallback", system-ui, sans-serif;
 
   --maxw:1680px;
   --pad:clamp(20px, 4.5vw, 80px);
