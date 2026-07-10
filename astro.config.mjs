@@ -14,7 +14,8 @@ export default defineConfig({
   integrations: [
     // Answer Engine Optimization — generates machine-readable files for AI
     // crawlers (ChatGPT, Claude, Perplexity, Google AI Overviews) at build time.
-    // All output is static; the client-side "Human/AI" widget is disabled.
+    // A small Human/AI toggle widget is enabled (bundled by Astro, served from
+    // 'self' — works under the site CSP; builds the AI view from the page).
     aeoAstroIntegration({
       title: '4/RL Co. · Independent AI Venture Studio',
       description: SITE_DESC,
@@ -29,8 +30,8 @@ export default defineConfig({
         manifest: true, // docs.json — keeps the auto-injected discovery link valid
         rawMarkdown: false, // no src/content collection here; avoids a scan warning
       },
-      // No extra client JS — do not inject the Human/AI widget.
-      widget: { enabled: false },
+      // Human/AI toggle — lets visitors view the AI-readable version of the page.
+      widget: { enabled: true, size: 'small' },
       schema: {
         enabled: true,
         organization: {
