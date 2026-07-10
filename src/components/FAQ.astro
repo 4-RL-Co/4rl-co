@@ -1,0 +1,84 @@
+---
+// FAQ — visible question/answer content + FAQPage structured data.
+// Boosts AI-citation rate and gives answer engines clean Q&A pairs to quote.
+// Answers are plain strings so they can be reused verbatim in the JSON-LD.
+const faqs = [
+  {
+    q: 'What is 4/RL Co.?',
+    a: '4/RL Co. is an independent AI venture studio based in São Paulo, Brazil. We build and operate our own companies that put artificial intelligence to work on real problems, across influence, education, applied AI and cinema.',
+  },
+  {
+    q: 'What does "4/RL" mean?',
+    a: '"4/RL" reads as "for real." The slash is the line every project has to cross, from promise to proof. Our thesis fits in one sentence: improve the world with AI, for real.',
+  },
+  {
+    q: 'What companies does 4/RL operate?',
+    a: 'Four ventures: Smart Social (an influence and media network), LabEpi (teaching epidemiology and the scientific method), D.Lab Experts (applied AI put to work where it moves the numbers), and M1m1c Box (cinematic storytelling made with AI).',
+  },
+  {
+    q: 'Is 4/RL an agency or a consultancy?',
+    a: 'Neither. We do not sell a service. We own our ventures and operate them for the long haul — we start companies and run them.',
+  },
+  {
+    q: 'Who founded 4/RL?',
+    a: '4/RL was founded by Gabriel Olegário, an advertiser and builder in São Paulo who sets the direction and ships the work.',
+  },
+  {
+    q: 'Where is 4/RL based and what languages does it work in?',
+    a: '4/RL is based in São Paulo, Brazil, and works with partners and audiences worldwide in Portuguese and English.',
+  },
+  {
+    q: 'How can I get in touch with 4/RL?',
+    a: 'Email olegas@4real.ventures, or reach out on WhatsApp, LinkedIn, GitHub or Telegram — all linked in the footer.',
+  },
+];
+
+// FAQPage schema — one Question/Answer node per entry, answers verbatim.
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+<section class="faq" id="faq">
+  <div class="wrap">
+    <p class="seclabel reveal"><span class="n">04</span> <span class="slash">/</span> FAQ</p>
+
+    <h2 class="faq__title display reveal" data-d="1">
+      Questions <span class="slash">/</span> answered.
+    </h2>
+
+    <ul class="faq__list">
+      {faqs.map((f) => (
+        <li class="faq__item reveal">
+          <h3 class="faq__q">{f.q}</h3>
+          <p class="faq__a">{f.a}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<style>
+  .faq{ padding-top:clamp(64px,9vh,110px); padding-bottom:clamp(56px,8vh,100px); }
+  .faq__title{
+    text-transform:uppercase;
+    font-size:clamp(28px,5vw,72px); letter-spacing:-.04em; line-height:.98;
+    margin-bottom:clamp(40px,6vw,80px);
+  }
+  .faq__list{ list-style:none; display:grid; gap:0; }
+  .faq__item{ border-top:1px solid var(--line); padding:clamp(22px,3vw,36px) 0; }
+  .faq__list li:last-child{ border-bottom:1px solid var(--line); }
+  .faq__q{
+    font-family:var(--font-display); font-weight:600; letter-spacing:-.02em;
+    font-size:clamp(19px,2.2vw,30px); line-height:1.12; color:var(--ink);
+    margin-bottom:14px;
+  }
+  .faq__a{ color:var(--ink-muted); font-size:clamp(15px,1.5vw,19px); line-height:1.6; max-width:70ch; }
+</style>

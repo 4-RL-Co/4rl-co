@@ -2,8 +2,28 @@
 import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import { articles } from '../../data/journal.js';
+
+const site = 'https://www.4real.ventures';
+// CollectionPage schema — models the journal index as a content page listing posts.
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${site}/journal/#webpage`,
+  url: `${site}/journal/`,
+  name: 'Journal · 4/RL Co.',
+  description: 'Writing from 4/RL Co.: notes and ideas on building AI ventures.',
+  isPartOf: { '@id': `${site}/#website` },
+  inLanguage: 'en',
+  hasPart: articles.map((a) => ({
+    '@type': 'BlogPosting',
+    headline: a.title,
+    url: `${site}/journal/${a.slug}/`,
+    datePublished: a.date,
+    author: { '@type': 'Person', name: a.author },
+  })),
+};
 ---
-<Base title="Journal · 4/RL Co." description="Writing from 4/RL Co.: notes and ideas on building AI ventures.">
+<Base title="Journal · 4/RL Co." description="Writing from 4/RL Co.: notes and ideas on building AI ventures." jsonLd={collectionSchema}>
   <Nav />
   <main class="jrn">
     <div class="wrap">
@@ -24,7 +44,7 @@ import { articles } from '../../data/journal.js';
                 <a class="jrn__card" href={`/journal/${a.slug}`}>
                   <span class={'jrn__cover' + (a.cover ? '' : ' is-fallback')}>
                     {a.cover
-                      ? <img src={a.cover} alt="" loading="lazy" />
+                      ? <img src={a.cover} alt={`Cover image for “${a.title}”`} loading="lazy" />
                       : <span class="jrn__cover-title display">{a.title}</span>}
                   </span>
                   <span class="jrn__meta">

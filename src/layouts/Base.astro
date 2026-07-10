@@ -24,10 +24,11 @@ const social = [
   'https://github.com/olegas4real',
   'https://t.me/olegas4real',
 ];
-// Organization schema (homepage only) — helps search engines model the entity.
-const orgSchema = {
-  '@context': 'https://schema.org',
+// Homepage structured data — a @graph linking the Organization, the WebSite,
+// and the WebPage so search/answer engines can model the entity and the page.
+const orgNode = {
   '@type': 'Organization',
+  '@id': `${site}/#organization`,
   name: '4/RL Co.',
   alternateName: '4RL',
   url: site,
@@ -50,6 +51,32 @@ const orgSchema = {
     { '@type': 'Organization', name: 'LabEpi', url: 'https://laboratoriodeepidemiologia.com/' },
     { '@type': 'Organization', name: 'D.Lab Experts', url: 'https://dlabexperts.com/' },
     { '@type': 'Organization', name: 'M1m1c Box', url: 'https://www.youtube.com/@m1m1cbox' },
+  ],
+};
+const homeSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    orgNode,
+    {
+      '@type': 'WebSite',
+      '@id': `${site}/#website`,
+      url: site,
+      name: '4/RL Co.',
+      description,
+      publisher: { '@id': `${site}/#organization` },
+      inLanguage: 'en',
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${canonicalURL}#webpage`,
+      url: canonicalURL,
+      name: title,
+      description,
+      isPartOf: { '@id': `${site}/#website` },
+      about: { '@id': `${site}/#organization` },
+      primaryImageOfPage: `${site}/og-image.png`,
+      inLanguage: 'en',
+    },
   ],
 };
 ---
@@ -106,12 +133,12 @@ const orgSchema = {
   <meta name="twitter:image" content={site + '/og-image.png'} />
 
   {/* structured data: Organization on the homepage, page-specific schema elsewhere */}
-  {isHome && <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />}
+  {isHome && <script type="application/ld+json" set:html={JSON.stringify(homeSchema)} />}
   {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 </head>
 <body>
   <div class="preloader" id="preloader" aria-hidden="true">
-    <img src="/4rl-mark.svg" alt="" width="60" height="60" />
+    <img src="/4rl-mark.svg" alt="4/RL Co. logo" width="60" height="60" />
   </div>
 
   <div class="cursor" id="cursor" aria-hidden="true"></div>
