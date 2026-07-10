@@ -24,9 +24,12 @@ const social = [
   'https://github.com/olegas4real',
   'https://t.me/olegas4real',
 ];
-// Homepage structured data — a @graph linking the Organization, the WebSite,
-// and the WebPage so search/answer engines can model the entity and the page.
+// Homepage structured data — Organization, WebSite and WebPage emitted as
+// separate top-level JSON-LD blocks (not wrapped in @graph). Cross-links via
+// @id still resolve across blocks, and a top-level Organization node is what
+// crawlers/audits look for when reading the company name + logo.
 const orgNode = {
+  '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': `${site}/#organization`,
   name: '4/RL Co.',
@@ -53,32 +56,29 @@ const orgNode = {
     { '@type': 'Organization', name: 'M1m1c Box', url: 'https://www.youtube.com/@m1m1cbox' },
   ],
 };
-const homeSchema = {
+const websiteNode = {
   '@context': 'https://schema.org',
-  '@graph': [
-    orgNode,
-    {
-      '@type': 'WebSite',
-      '@id': `${site}/#website`,
-      url: site,
-      name: '4/RL Co.',
-      description,
-      publisher: { '@id': `${site}/#organization` },
-      inLanguage: 'en',
-    },
-    {
-      '@type': 'WebPage',
-      '@id': `${canonicalURL}#webpage`,
-      url: canonicalURL,
-      name: title,
-      description,
-      isPartOf: { '@id': `${site}/#website` },
-      about: { '@id': `${site}/#organization` },
-      primaryImageOfPage: `${site}/og-image.png`,
-      inLanguage: 'en',
-    },
-  ],
+  '@type': 'WebSite',
+  '@id': `${site}/#website`,
+  url: site,
+  name: '4/RL Co.',
+  description,
+  publisher: { '@id': `${site}/#organization` },
+  inLanguage: 'en',
 };
+const webpageNode = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${canonicalURL}#webpage`,
+  url: canonicalURL,
+  name: title,
+  description,
+  isPartOf: { '@id': `${site}/#website` },
+  about: { '@id': `${site}/#organization` },
+  primaryImageOfPage: `${site}/og-image.png`,
+  inLanguage: 'en',
+};
+const homeSchemas = [orgNode, websiteNode, webpageNode];
 ---
 <!doctype html>
 <html lang="en">
@@ -133,7 +133,7 @@ const homeSchema = {
   <meta name="twitter:image" content={site + '/og-image.png'} />
 
   {/* structured data: Organization on the homepage, page-specific schema elsewhere */}
-  {isHome && <script type="application/ld+json" set:html={JSON.stringify(homeSchema)} />}
+  {isHome && homeSchemas.map((node) => <script type="application/ld+json" set:html={JSON.stringify(node)} />)}
   {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 </head>
 <body>
