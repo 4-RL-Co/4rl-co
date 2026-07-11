@@ -59,7 +59,11 @@
   @media (max-width:760px){
     .nav__toggle{ display:block; }
     .nav__panel{
-      position:fixed; inset:0; z-index:1;
+      /* Explicit viewport sizing, not inset:0 — the parent .nav uses
+         backdrop-filter, which makes it the containing block for this
+         fixed child, so inset:0 would size the panel to the 60px bar
+         instead of the screen (menu overflows over the page). */
+      position:fixed; top:0; left:0; width:100vw; height:100vh; height:100dvh; z-index:1;
       flex-direction:column; align-items:flex-start; justify-content:center;
       gap:8px; padding:0 var(--pad);
       background:var(--bg);
