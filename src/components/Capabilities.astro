@@ -1,0 +1,104 @@
+---
+// Capabilities — the studio's range as an intentional thesis: one studio applying
+// AI across the whole value chain, from business to creative. Sits between Hero and
+// Work. Reuses the shared primitives (.seclabel, .reveal, .slash, .hl) so it stays
+// 100% inside the design system; fade-up comes from the global IntersectionObserver
+// in Base.astro (content is visible by default, reduced motion respected).
+const pillars = [
+  {
+    idx: '01',
+    title: 'Operations & Growth',
+    line: 'Strategy, growth and commercial, powered by AI.',
+  },
+  {
+    idx: '02',
+    title: 'Data & Applied AI',
+    line: 'Turning data and AI into decisions that move the numbers.',
+  },
+  {
+    idx: '03',
+    title: 'Creative & Content',
+    line: 'AI-native creative, from concept to production.',
+  },
+];
+---
+<section class="cap" id="capabilities" aria-labelledby="cap-title">
+  <div class="wrap">
+    <p class="cap__kicker seclabel reveal">Capabilities <span class="slash">/</span></p>
+
+    <h2 class="cap__title display reveal" id="cap-title" data-d="1">
+      One studio, the full <span class="hl">value</span> chain.
+    </h2>
+    <p class="cap__sub reveal" data-d="2">From the back office to the brand.</p>
+
+    <ul class="cap__grid">
+      {pillars.map((p, i) => (
+        <li class="cap__pillar reveal" data-d={String(i + 1)}>
+          <p class="cap__idx mono"><span class="slash" aria-hidden="true">/</span> {p.idx}</p>
+          <h3 class="cap__name">{p.title}</h3>
+          <p class="cap__line">{p.line}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .cap{
+    padding-top:clamp(80px,13vh,150px);
+    padding-bottom:clamp(56px,9vh,110px);
+  }
+
+  /* Headline: giant, tight grotesque. Lime lands only on the keyword. */
+  .cap__title{
+    font-size:clamp(34px,7vw,104px);
+    letter-spacing:-.045em; line-height:.94;
+    max-width:15ch;
+  }
+  .cap__sub{
+    margin-top:clamp(16px,2.4vh,28px);
+    color:var(--ink-muted);
+    font-size:clamp(14px,1.35vw,18px);
+    max-width:42ch;
+  }
+
+  /* Three pillars — 3 columns on desktop, thin --line rules for grid structure. */
+  .cap__grid{
+    list-style:none;
+    margin-top:clamp(44px,7vh,92px);
+    display:grid; grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--line);
+  }
+  .cap__pillar{ padding:clamp(30px,3.4vw,48px) 0; }
+  .cap__pillar + .cap__pillar{
+    border-left:1px solid var(--line);
+    padding-left:clamp(24px,2.6vw,44px);
+  }
+
+  .cap__idx{
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:16px; color:var(--ink-muted);
+  }
+  .cap__idx .slash{ color:var(--accent); }   /* the "/" motif, in lime */
+
+  .cap__name{
+    font-family:var(--font-display); font-weight:700;
+    letter-spacing:-.02em; line-height:1;
+    font-size:clamp(21px,2vw,30px); text-transform:uppercase;
+    transition:color .3s var(--ease);
+  }
+  .cap__pillar:hover .cap__name{ color:var(--accent); }   /* lime only on hover */
+
+  .cap__line{
+    margin-top:14px; color:var(--ink-muted);
+    font-size:clamp(13px,1.25vw,16px);
+    max-width:34ch;
+  }
+
+  /* Mobile: stack cleanly, no horizontal overflow. Rules become top borders. */
+  @media (max-width:760px){
+    .cap__grid{ grid-template-columns:1fr; border-top:0; }
+    .cap__pillar{ padding:clamp(22px,6vw,30px) 0; border-top:1px solid var(--line); }
+    .cap__pillar + .cap__pillar{ border-left:0; padding-left:0; }
+  }
+</style>
