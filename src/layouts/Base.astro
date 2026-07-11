@@ -21,7 +21,7 @@ const canonicalURL = site + Astro.url.pathname;
 // Brand social profiles — used for schema.org sameAs (entity linking).
 const social = [
   'https://www.linkedin.com/company/4rl-co/',
-  'https://github.com/olegas4real',
+  'https://github.com/4-RL-Co',
   'https://t.me/olegas4real',
 ];
 // Homepage structured data — Organization, WebSite and WebPage emitted as
@@ -113,10 +113,12 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
   <link rel="canonical" href={canonicalURL} />
   <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
   <link rel="dns-prefetch" href="https://www.clarity.ms" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/svg+xml" href="/4rl-favicon.svg" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-  <link rel="apple-touch-icon" href="/favicon-180.png" />
+  <link rel="icon" href={site + '/favicon.ico'} sizes="any" />
+  <link rel="shortcut icon" href={site + '/favicon.ico'} />
+  <link rel="icon" type="image/png" sizes="512x512" href={site + '/favicon-512.png'} />
+  <link rel="icon" type="image/png" sizes="32x32" href={site + '/favicon-32.png'} />
+  <link rel="icon" type="image/svg+xml" href={site + '/4rl-favicon.svg'} />
+  <link rel="apple-touch-icon" sizes="180x180" href={site + '/apple-touch-icon-180.png'} />
   <link rel="manifest" href="/site.webmanifest" />
 
   <meta property="og:type" content="website" />
@@ -188,11 +190,20 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
     /* ---- Custom cursor (desktop pointer only) ---- */
     const fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
     if (fine && !reduce) {
-      document.documentElement.classList.add('hide-cursor'); /* hide OS cursor */
+      const root = document.documentElement;
+      root.classList.add('hide-cursor'); /* hide OS cursor */
       const c = document.getElementById('cursor');
       const d = document.getElementById('cursorDot');
       let cx = innerWidth / 2, cy = innerHeight / 2, dx = cx, dy = cy;
+      let cursorPaused = false;
+      const setCustomCursor = (enabled) => {
+        cursorPaused = !enabled;
+        root.classList.toggle('hide-cursor', enabled);
+        c.style.opacity = enabled ? c.style.opacity : '0';
+        d.style.opacity = enabled ? d.style.opacity : '0';
+      };
       addEventListener('pointermove', (e) => {
+        if (cursorPaused) return;
         cx = e.clientX; cy = e.clientY;
         d.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
         c.style.opacity = '1'; d.style.opacity = '1';
@@ -207,6 +218,16 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
         el.addEventListener('pointerenter', hover(true));
         el.addEventListener('pointerleave', hover(false));
       });
+      const syncAeoCursor = () => {
+        const overlay = document.querySelector('.aeo-overlay');
+        const open = overlay && getComputedStyle(overlay).display !== 'none' && overlay.getBoundingClientRect().width > 0;
+        setCustomCursor(!open);
+      };
+      const mo = new MutationObserver(syncAeoCursor);
+      mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
+      addEventListener('keydown', syncAeoCursor);
+      addEventListener('click', () => requestAnimationFrame(syncAeoCursor));
+      syncAeoCursor();
     }
   </script>
 </body>

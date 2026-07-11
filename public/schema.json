@@ -1,0 +1,94 @@
+{
+  "site": [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "4/RL Co. · Independent AI Venture Studio",
+      "description": "We improve the world with AI. For real. An independent AI venture studio building and operating ventures across influence, science, applied AI and cinema.",
+      "url": "https://www.4real.ventures"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "4/RL Co.",
+      "url": "https://www.4real.ventures",
+      "logo": "https://www.4real.ventures/favicon-512.png",
+      "sameAs": [
+        "https://www.linkedin.com/company/4rl-co/",
+        "https://github.com/4-RL-Co",
+        "https://t.me/olegas4real"
+      ]
+    }
+  ],
+  "pages": {
+    "/": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "4/RL Co. · Independent AI Venture Studio",
+        "url": "https://www.4real.ventures",
+        "description": "We improve the world with AI. For real. An independent AI venture studio building and operating ventures across influence, science, applied AI and cinema."
+      }
+    ],
+    "/journal": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Journal · 4/RL Co.",
+        "url": "https://www.4real.ventures/journal",
+        "description": "Writing from 4/RL Co.: notes and ideas on building AI ventures."
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.4real.ventures/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Journal",
+            "item": "https://www.4real.ventures/journal"
+          }
+        ]
+      }
+    ],
+    "/journal/the-tool-answered-back": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "The tool answered back · 4/RL Co. Journal",
+        "url": "https://www.4real.ventures/journal/the-tool-answered-back",
+        "description": "The 4/RL manifesto"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.4real.ventures/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Journal",
+            "item": "https://www.4real.ventures/journal"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "The tool answered back",
+            "item": "https://www.4real.ventures/journal/the-tool-answered-back"
+          }
+        ]
+      }
+    ]
+  }
+}

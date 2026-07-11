@@ -40,7 +40,7 @@ export default defineConfig({
           logo: `${SITE_URL}/favicon-512.png`,
           sameAs: [
             'https://www.linkedin.com/company/4rl-co/',
-            'https://github.com/olegas4real',
+            'https://github.com/4-RL-Co',
             'https://t.me/olegas4real',
           ],
         },
