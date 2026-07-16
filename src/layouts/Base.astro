@@ -174,6 +174,28 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
       setTimeout(showAll, 1200);
     }
 
+    /* ---- Marquees: one shared speed, whatever the content ----
+       Duration comes from each track's own width so every strip moves at the
+       same px/s. Hardcoding one duration made the wider strip race the narrower
+       one. The track holds 3 copies and the keyframe travels exactly 1 of them,
+       so the distance per cycle is scrollWidth / 3.
+       If this never runs, the CSS fallback duration still animates. */
+    const MARQUEE_PX_PER_SEC = 26;
+    const timeMarquees = () => {
+      document.querySelectorAll('.marquee__track').forEach((track) => {
+        const perCycle = track.scrollWidth / 3;
+        if (!perCycle) return;
+        track.style.setProperty('--marquee-dur', (perCycle / MARQUEE_PX_PER_SEC).toFixed(2) + 's');
+      });
+    };
+    if (!reduce) {
+      timeMarquees();
+      // Webfonts land after first paint and change the text strip's width.
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(timeMarquees);
+      let t;
+      addEventListener('resize', () => { clearTimeout(t); t = setTimeout(timeMarquees, 200); });
+    }
+
     /* ---- Preloader: mark hold, then a "/" wipe. Once per session. Non-blocking. ---- */
     const pre = document.getElementById('preloader');
     if (pre) {

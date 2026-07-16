@@ -1,17 +1,73 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import { ventures } from '../data/ventures.js';
+
+// Wordmarks are resolved at BUILD time, never at runtime: a missing file falls
+// back to the grotesque name, so the page can never ship a broken image.
+// We also read the viewBox to get each mark's aspect ratio, which lets the row
+// reserve the right width up front (no reflow when the SVG lands).
+const MARK_DIR = path.resolve('public/ventures');
+
+// SVG: the viewBox is the aspect. PNG: the IHDR header is, and it sits at a fixed
+// offset, so no image library is needed just to read two integers.
+function aspectOf(full) {
+  if (/\.svg$/i.test(full)) {
+    const vb = fs
+      .readFileSync(full, 'utf8')
+      .match(/viewBox\s*=\s*["']\s*[\d.-]+[ ,]+[\d.-]+[ ,]+([\d.]+)[ ,]+([\d.]+)/i);
+    if (!vb) return null;
+    const w = parseFloat(vb[1]);
+    const h = parseFloat(vb[2]);
+    return w > 0 && h > 0 ? +(w / h).toFixed(4) : null;
+  }
+  const buf = fs.readFileSync(full);
+  const isPng = buf.length > 24 && buf.toString('ascii', 12, 16) === 'IHDR';
+  if (!isPng) return null;
+  const w = buf.readUInt32BE(16);
+  const h = buf.readUInt32BE(20);
+  return w > 0 && h > 0 ? +(w / h).toFixed(4) : null;
+}
+
+function readMark(file) {
+  if (!file) return null;
+  const full = path.join(MARK_DIR, file);
+  if (!fs.existsSync(full)) return null;
+  let ar = null;
+  try {
+    ar = aspectOf(full);
+  } catch {
+    return null; // unreadable file behaves exactly like a missing one
+  }
+  return { src: `/ventures/${file}`, ar };
+}
+
+const rows = ventures.map((v) => ({ ...v, markData: readMark(v.mark) }));
+const missing = rows.filter((r) => r.mark && !r.markData).map((r) => r.mark);
+if (missing.length) {
+  console.warn(`[work] wordmark(s) missing, falling back to type: ${missing.join(', ')}`);
+}
 ---
 <section class="work" id="work">
   <div class="wrap">
     <p class="seclabel reveal"><span class="n">01</span> <span class="slash">/</span> Work · Companies</p>
 
     <ul class="work__list">
-      {ventures.map((v) => (
+      {rows.map((v) => (
         <li class="reveal">
           <a class="work__row row" href={v.href} target="_blank" rel="noopener">
             <span class="work__idx mono">{v.idx}</span>
             <span class="work__main">
-              <span class="work__name display">{v.name}</span>
+              {v.markData ? (
+                <span
+                  class="work__mark"
+                  style={`--s:${v.scale ?? 1};${v.markData.ar ? ` --ar:${v.markData.ar};` : ''}`}
+                >
+                  <img src={v.markData.src} alt={v.name} loading="lazy" decoding="async" />
+                </span>
+              ) : (
+                <span class="work__name display">{v.name}</span>
+              )}
               <span class="work__line">{v.line}</span>
             </span>
             <span class="work__sector mono">{v.sector}</span>
@@ -41,13 +97,46 @@ import { ventures } from '../data/ventures.js';
     text-transform:uppercase; transition:color .3s var(--ease);
   }
   .work__row:hover .work__name{ color:var(--accent); }
+
+  /* ---- wordmark ----
+     Capped by HEIGHT, never width, so marks of different proportions share one
+     optical size. Deliberately small: these are proof, not billboards, and at
+     full size a row of white logos shouts over the copy next to it.
+     --s trims an individual mark. */
+  .work__mark{
+    --mark-h:calc(clamp(18px,2.6vw,40px) * var(--s, 1));
+    position:relative; display:block; width:max-content;
+  }
+  .work__mark img{
+    display:block; height:var(--mark-h); width:auto;
+    /* aspect-ratio comes from the file itself (SVG viewBox, PNG header): it
+       reserves the width before the file loads, so the row never jumps. */
+    aspect-ratio:var(--ar, auto);
+    /* Every supplied mark is white artwork, so brightness() is a colour dial on
+       it: .541 lands #FFF on #8A8A8A (--ink-muted) and .95 lands it on #F2F2F2
+       (--ink). So the mark rests muted and steps forward on hover, which is the
+       same move .work__sector already makes in this row. Black knockouts, like
+       the "S" in the Smart Social tile, stay black either way. */
+    filter:brightness(.541);
+    transition:filter .45s var(--ease);
+  }
+  .work__row:hover .work__mark img{ filter:brightness(.95); }
+
   .work__line{ display:block; color:var(--ink-muted); margin-top:12px; max-width:52ch; font-size:clamp(13px,1.3vw,16px); }
   .work__sector{ white-space:nowrap; color:var(--ink-muted); }
   .work__row:hover .work__sector{ color:var(--ink); }
   .work__arr{ font-size:22px; color:var(--accent); }
 
+  @media (prefers-reduced-motion: reduce){
+    .work__mark img{ transition:none; }
+  }
+
+
   @media (max-width:760px){
     .work__row{ grid-template-columns:auto 1fr auto; gap:16px; }
     .work__sector{ display:none; }
+    /* The height clamp bottoms out at 22px, so a mark stays small here on its
+       own. Width follows the aspect ratio and is never capped: capping it would
+       squash the mark and desync the mask that sits on top of it. */
   }
 </style>

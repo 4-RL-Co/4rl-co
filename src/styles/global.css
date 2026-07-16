@@ -8,6 +8,10 @@
 @import '@fontsource/space-mono/400.css';
 @import '@fontsource/space-mono/700.css';
 @import '@fontsource-variable/inter';
+/* Second display voice. Only 400 ships: Instrument Serif is a single-weight
+   display face, and it is only ever used for one italic word in a headline. */
+@import '@fontsource/instrument-serif/400.css';
+@import '@fontsource/instrument-serif/400-italic.css';
 
 /* Metric-matched fallbacks (values generated from the real font metrics) so the
    system font occupies the exact same space until the webfont loads → no CLS on swap. */
@@ -20,6 +24,16 @@
   font-family:"Inter Variable fallback";
   src:local("Arial");
   size-adjust:107.1194%; ascent-override:90.4365%; descent-override:22.518%; line-gap-override:0%;
+}
+/* Georgia sets the serif word ~24% wider than Instrument Serif does, so without
+   this the word visibly re-flows when the webfont swaps in. size-adjust is
+   measured on the words actually used (value, improves, build, public) rather
+   than a generic average; the overrides are the real font's metrics divided by
+   that adjust, same derivation as the two above. */
+@font-face{
+  font-family:"Instrument Serif fallback";
+  src:local("Georgia");
+  size-adjust:80.787%; ascent-override:122.5445%; descent-override:38.3725%; line-gap-override:0%;
 }
 
 :root{
@@ -34,6 +48,13 @@
   --font-display:"Space Grotesk Variable", "Space Grotesk Variable fallback", system-ui, sans-serif;
   --font-mono:"Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-body:"Inter Variable", "Inter Variable fallback", system-ui, sans-serif;
+  --font-serif:"Instrument Serif", "Instrument Serif fallback", Georgia, "Times New Roman", serif;
+
+  /* Fixed nav height, used by scroll-margin so anchored headings never land
+     under the bar. Measured, not guessed: 18px padding top and bottom around
+     the "Let's talk" pill on desktop, and around the bare logo row on mobile
+     once the pill moves into the panel. */
+  --nav-h:78px;
 
   --maxw:1680px;
   --pad:clamp(20px, 4.5vw, 80px);
@@ -93,6 +114,23 @@ button{ font:inherit; }
   line-height:.92;
 }
 
+/* ---- second voice ----
+   One italic serif word inside a grotesque headline. Never in mono labels,
+   nav, buttons or body copy, and never on the same word as the lime accent:
+   a word is either .hl or .serif.
+
+   font-size:.972em is not a guess. Measured from the real fonts:
+   Space Grotesk cap height = .700em, Instrument Serif = .720em, so
+   700/720 = .9722 makes the caps match and the shared baseline hold.
+   Tracking resets because the display's -.03em is drawn for the grotesque. */
+.serif{
+  font-family:var(--font-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:.972em;
+  letter-spacing:-.005em;
+}
+
 /* section label like "01 / WORK" */
 .seclabel{
   font-family:var(--font-mono);
@@ -108,6 +146,25 @@ button{ font:inherit; }
 
 /* thin rule */
 .rule{ border:0; border-top:1px solid var(--line); }
+
+/* Readable by screen readers, invisible on screen. For content that a decorative
+   element (a looping marquee) carries visually but cannot expose. */
+.vh{
+  position:absolute; width:1px; height:1px; overflow:hidden;
+  clip-path:inset(50%); white-space:nowrap; border:0; padding:0; margin:-1px;
+}
+
+/* ---- anchored sections clear the fixed nav ----
+   Without this, #work and friends scroll flush to the viewport top and the
+   heading sits under the bar, where the backdrop-filter blurs it. Applied to
+   anything addressable by a fragment, so it holds for nav links, deep links
+   and in-page jumps alike. */
+:target,
+section[id],
+article[id],
+h1[id], h2[id], h3[id]{
+  scroll-margin-top:calc(var(--nav-h) + 32px);
+}
 
 /* buttons / pills */
 .pill{
@@ -136,9 +193,22 @@ html.js .reveal.in{ opacity:1; transform:none; }
 .reveal[data-d="2"]{ transition-delay:.10s; }
 .reveal[data-d="3"]{ transition-delay:.15s; }
 
-@keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+/* Tracks render their contents THREE times, so one copy is 33.3333% of the track
+   and that is exactly how far the loop may travel. The old -50% stopped at 1.5
+   copies, which is not a repeat boundary, so every cycle ended by snapping the
+   content sideways by half a copy (422px in News, 792px in the stack strip).
+   Any change to the number of copies has to change this number with it. */
+@keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-33.3333%); } }
 .marquee{ overflow:hidden; white-space:nowrap; }
-.marquee__track{ display:inline-flex; gap:0; animation:marquee 28s linear infinite; will-change:transform; }
+/* Duration is set per marquee from its own width (see Base.astro) so that every
+   strip moves at the same px/s no matter how much content it holds. A single
+   fixed duration made the wider strip race: 85px/s against 45px/s. The fallback
+   only applies if that script never runs. */
+.marquee__track{
+  display:inline-flex; gap:0;
+  animation:marquee var(--marquee-dur, 44s) linear infinite;
+  will-change:transform;
+}
 .marquee:hover .marquee__track{ animation-play-state:paused; }
 
 /* the animated "/" motif */
@@ -194,4 +264,10 @@ html.hide-cursor, html.hide-cursor a, html.hide-cursor button, html.hide-cursor 
    ========================================================= */
 @media (max-width:760px){
   .aeo-toggle, .aeo-overlay{ display:none !important; }
+}
+
+/* The bar loses the "Let's talk" pill to the panel below the nav breakpoint,
+   so it gets shorter and scroll-margin has to follow it down. */
+@media (max-width:760px){
+  :root{ --nav-h:60px; }
 }
