@@ -2,7 +2,7 @@
 
 `Work.astro` picks these up at build time; nothing else needs editing.
 
-| File | Venture | Source it was made from |
+| File | Venture | Cut from (masters live in `design-src/`, untracked) |
 |---|---|---|
 | `smart-social.svg` | Smart Social | `smartsocial.svg`, already trimmed, copied as is |
 | `labepi.svg` | LabEpi | `labepi-vetores-12.svg`, viewBox retargeted to the ink |

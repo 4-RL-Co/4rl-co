@@ -44,12 +44,9 @@ yarn-error.log*
 # personal notes
 Como usar o mark (Claude Code).md
 
-# Source artwork kept locally, not versioned. These are the untrimmed, full-size
-# masters the site's assets were derived from: gumehome.png became
-# src/assets/gume-home.png, and the other three became public/ventures/*. What
-# the site actually serves is committed; these are only here to re-cut from, so
-# they stay out of the repo rather than adding ~5MB of pixels nothing builds on.
-/gumehome.png
-/d.lablogo.png
-/m1m1cbox.png
-/labepi-vetores-12.svg
+# Source artwork: the folder and its README are tracked, the art itself is not.
+# These are the untrimmed, full-size masters the committed assets were cut from,
+# so they are worth keeping on disk and not worth ~5MB in the repo. The README
+# survives so a fresh clone still explains what belongs here and why it is empty.
+/design-src/*
+!/design-src/README.md
