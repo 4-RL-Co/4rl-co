@@ -5,6 +5,20 @@ dist/
 .vercel/
 .output/
 
+# aeo.js output. Generated on every build, so tracking it only ever produced
+# a dirty diff. Worse, the local build writes a gutted stub over public/ (a
+# 935-byte llms-full.txt against the real 8184) while writing the correct file
+# to dist/, which is what actually deploys. So the committed copies were both
+# stale and wrong, and reviewing a real change meant picking them out by hand.
+# Verified: with these absent, a clean build still emits all seven to dist/.
+public/llms.txt
+public/llms-full.txt
+public/ai-index.json
+public/schema.json
+public/docs.json
+public/sitemap.xml
+public/robots.txt
+
 # env: ignore every env file, but keep the documented template
 .env
 .env.*
