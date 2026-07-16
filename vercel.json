@@ -2,7 +2,20 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
-      "_comment": "Apex to www. MUST be /(.*) and not /:path* : the latter matches /journal and /favicon.ico but NOT paths ending in a slash, so the homepage itself stayed on the apex while every asset on it 308'd across to www. That is a cross-origin request, img-src 'self' refuses it, and every image on the page broke for anyone who typed the domain without the www.",
+      "_comment": "Apex to www, and the root MUST be its own rule. Verified against production: neither /:path* nor /(.*) matches a path ending in a slash, so with only a wildcard the homepage answered 200 and the visitor stayed on the apex, while every asset on that page 308'd across to www. Cross-origin, so img-src 'self' refused all of it and every image broke for anyone who typed the domain without the www. Probe it with a fresh path: /x must 308 and /x/ must not 404.",
+      "source": "/",
+      "has": [{ "type": "host", "value": "4real.ventures" }],
+      "destination": "https://www.4real.ventures/",
+      "permanent": true
+    },
+    {
+      "_comment": "Same rule for /journal/ and any other directory root.",
+      "source": "/:path+/",
+      "has": [{ "type": "host", "value": "4real.ventures" }],
+      "destination": "https://www.4real.ventures/:path+/",
+      "permanent": true
+    },
+    {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "4real.ventures" }],
       "destination": "https://www.4real.ventures/$1",
