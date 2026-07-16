@@ -1,0 +1,175 @@
+---
+// Open Source: the work we do in public. Deliberately NOT in "Work · Companies":
+// those four are companies (revenue, closed, logo-only). What's here is open and
+// anyone can run their own, so listing it as "05" would misstate it and waste the
+// one thing that makes it different.
+// Gume is ONE entry, not the section: the list frames it as the one that's live,
+// with the epidemiology work alongside it. Compact by design: it sits between
+// Work and News and must not out-shout either.
+// Claims are checked against the repo (AGPL-3.0, ai/DECISIONS.md, ~300K editions,
+// PT-BR, supporter funding: optional, cosmetic, unlocks nothing). The epidemiology
+// row promises nothing: no link, no date, because no repo is public yet. Its plate
+// is the brand's slash motif in existing tokens, never a mockup of a product that
+// doesn't exist.
+// The shot is gume.club's own home: the wall of real covers is the argument, and
+// it is the page you actually land on from here. Decorative, so alt is empty and
+// the link is hidden from assistive tech: gume.club is already in the link list
+// below, and announcing it twice is noise.
+import { Image } from 'astro:assets';
+import gumeHome from '../assets/gume-home.png';
+
+const links = [
+  { label: 'gume.club', href: 'https://gume.club' },
+  { label: 'GitHub', href: 'https://github.com/4-RL-Co/gume-club' },
+  { label: 'Discussions', href: 'https://github.com/4-RL-Co/gume-club/discussions' },
+];
+---
+<section class="os" id="open-source" aria-labelledby="os-title">
+  <div class="wrap">
+    <p class="seclabel reveal"><span class="n">02</span> <span class="slash">/</span> Open Source</p>
+
+    <h2 class="os__title display reveal" id="os-title" data-d="1">
+      Some of it we build in <span class="hl">public</span>.
+    </h2>
+    <p class="os__sub reveal" data-d="2">
+      In the other four you see the result. Here, the work itself: the code, the schema,
+      and a decision log where every choice carries its reason, including the ones we got
+      wrong and reversed. It's in <code class="os__code">ai/DECISIONS.md</code>, and anyone can read it.
+    </p>
+
+    <ul class="os__list">
+      <li class="os__item reveal" data-d="1">
+        <a class="os__shot-link" href="https://gume.club" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+          <Image
+            class="os__shot"
+            src={gumeHome}
+            alt=""
+            widths={[420, 840]}
+            sizes="(max-width: 760px) 100vw, 420px"
+            format="webp"
+            quality={70}
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+
+        <div class="os__body">
+          <p class="os__meta mono">
+            <span class="os__live">Live</span> <span class="slash">/</span> AGPL-3.0 <span class="slash">/</span> Portuguese
+          </p>
+          <h3 class="os__name display">Gume</h3>
+          <p class="os__line">
+            A reading log, and <span class="os__em">not a company</span>. It will be paid for by
+            supporters, and that support stays optional and cosmetic: a badge on the profile,
+            nothing more. <span class="os__em">Paying unlocks nothing</span>, so everyone reads the
+            same Gume. Anyone can take the code and run their own; that exit is the point. It's
+            Brazilian and it's in Portuguese, by choice, so that's the app you'll land on. Built
+            with the people who use it: fix a wrong cover, open an issue, send a pull request.
+          </p>
+          <p class="os__stat mono"><span class="os__num">~300K</span> Portuguese-language editions in the catalog</p>
+          <nav class="os__links mono" aria-label="Gume">
+            {links.map((l) => (
+              <a href={l.href} target="_blank" rel="noopener">{l.label} <span class="arr">↗</span></a>
+            ))}
+          </nav>
+        </div>
+      </li>
+
+      <li class="os__item reveal" data-d="2">
+        {/* No product to show, so no mockup: the slash motif, in existing tokens. */}
+        <div class="os__plate" aria-hidden="true">
+          <span class="os__plate-label mono">No repo yet</span>
+        </div>
+
+        <div class="os__body">
+          <p class="os__meta mono">In progress <span class="slash">/</span> with LabEpi</p>
+          <h3 class="os__name display">Epidemiology</h3>
+          <p class="os__line">
+            Open tools for epidemiology and the scientific method, built with
+            <span class="os__em">LabEpi</span>. Same rule as above: when there's something to run,
+            the code is public and the decisions come with it.
+          </p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* Tighter than Work/News on purpose: this section supports them, it doesn't compete. */
+  .os{ padding-top:clamp(56px,7vh,90px); padding-bottom:clamp(48px,6vh,80px); }
+
+  .os__title{
+    text-transform:uppercase; font-weight:700;
+    font-size:clamp(22px,3vw,42px); letter-spacing:-.03em; line-height:1.02;
+    max-width:22ch;
+  }
+  .os__sub{
+    margin-top:clamp(14px,2vh,22px);
+    color:var(--ink-muted); font-size:clamp(14px,1.35vw,17px); max-width:70ch;
+  }
+  .os__code{
+    font-family:var(--font-mono); font-size:.88em;
+    color:var(--ink); background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:3px; padding:1px 6px;
+  }
+
+  .os__list{ list-style:none; margin-top:clamp(32px,4.5vh,56px); }
+  .os__item{
+    display:grid; grid-template-columns:minmax(0,420px) 1fr;
+    align-items:start; gap:clamp(20px,3vw,48px);
+    padding:clamp(22px,2.8vw,34px) 0; border-top:1px solid var(--line);
+  }
+  .os__list li:last-child{ border-bottom:1px solid var(--line); }
+
+  .os__shot{
+    width:100%; height:auto;
+    border:1px solid var(--line); border-radius:3px;
+    background:var(--bg-elev);
+    transition:border-color .3s var(--ease);
+  }
+  .os__shot-link:hover .os__shot{ border-color:var(--accent); }
+
+  /* The plate: the "/" motif tiled, matching the shot's aspect ratio so the rows
+     align. No new color, no illustration, and nothing that implies a product. */
+  .os__plate{
+    aspect-ratio:1600 / 874;
+    border:1px solid var(--line); border-radius:3px;
+    background:
+      repeating-linear-gradient(135deg,
+        var(--line) 0 2px,
+        transparent 2px 22px),
+      var(--bg-elev);
+    display:grid; place-items:center;
+  }
+  .os__plate-label{
+    color:var(--ink-muted);
+    background:var(--bg); border:1px solid var(--line); border-radius:100px;
+    padding:6px 14px; font-size:11px;
+  }
+
+  .os__meta{ color:var(--ink-muted); }
+  .os__live{ color:var(--accent); }
+  .os__name{
+    font-size:clamp(26px,3.4vw,52px); letter-spacing:-.04em; line-height:.96;
+    text-transform:uppercase; margin-top:10px;
+  }
+  .os__line{
+    margin-top:14px; color:var(--ink-muted);
+    font-size:clamp(14px,1.35vw,17px); max-width:52ch;
+  }
+  .os__em{ color:var(--ink); font-weight:600; }
+
+  .os__stat{ margin-top:18px; color:var(--ink-muted); }
+  .os__num{ color:var(--ink); font-size:1.35em; letter-spacing:-.02em; }
+
+  .os__links{ display:flex; flex-wrap:wrap; gap:clamp(14px,2vw,28px); margin-top:20px; }
+  .os__links a{ color:var(--ink); transition:color .25s var(--ease); }
+  .os__links a:hover{ color:var(--accent); }
+  .os__links .arr{ color:var(--accent); }
+  .os__links a:hover .arr{ transform:translate(2px,-2px); }
+
+  @media (max-width:760px){
+    .os__item{ grid-template-columns:1fr; gap:18px; }
+  }
+</style>
