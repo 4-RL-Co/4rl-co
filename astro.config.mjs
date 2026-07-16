@@ -12,10 +12,10 @@ export default defineConfig({
   compressHTML: true,
   build: { inlineStylesheets: 'always' },
   integrations: [
-    // Answer Engine Optimization — generates machine-readable files for AI
+    // Answer Engine Optimization: generates machine-readable files for AI
     // crawlers (ChatGPT, Claude, Perplexity, Google AI Overviews) at build time.
-    // A small Human/AI toggle widget is enabled (bundled by Astro, served from
-    // 'self' — works under the site CSP; builds the AI view from the page).
+    // The generators below are the whole point of this integration and they are
+    // all on; only the optional on-page widget is off. See the widget note.
     aeoAstroIntegration({
       title: '4/RL Co. · Independent AI Venture Studio',
       description: SITE_DESC,
@@ -30,8 +30,16 @@ export default defineConfig({
         manifest: true, // docs.json — keeps the auto-injected discovery link valid
         rawMarkdown: false, // no src/content collection here; avoids a scan warning
       },
-      // Human/AI toggle — lets visitors view the AI-readable version of the page.
-      widget: { enabled: true, size: 'small' },
+      // Human/AI toggle: OFF, and the AEO output above is untouched by it. The
+      // widget only ever offered an on-page toggle to the AI view; every file
+      // that AI crawlers actually read is generated either way, byte for byte.
+      // It cost more than it carried: it pulls JetBrains Mono from Google Fonts,
+      // which this site refuses on principle (every other face is self-hosted
+      // via Fontsource) and which the CSP blocks anyway, and it pins itself at
+      // z-index 2147483647, which put it over the open nav and forced a
+      // display:none hack to keep it off mobile at all. Half the audience never
+      // saw it, and the half that did saw it in a fallback font.
+      widget: { enabled: false },
       schema: {
         enabled: true,
         organization: {

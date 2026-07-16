@@ -255,16 +255,6 @@ html.preloaded .preloader{ display:none; }   /* skip on later navigations (once 
 /* When the custom cursor is active, hide the OS cursor entirely */
 html.hide-cursor, html.hide-cursor a, html.hide-cursor button, html.hide-cursor [data-cursor]{ cursor:none; }
 
-/* =========================================================
-   AEO "Human / AI" widget (aeo.js) — desktop only
-   On mobile its fixed pill uses z-index:2147483647 and floats over the
-   open nav menu, and its bundled Google-Fonts @import is blocked by our
-   CSP (so its icon falls back to a broken-image glyph). Hide it below the
-   nav breakpoint; the desktop widget and all static AEO output are kept.
-   ========================================================= */
-@media (max-width:760px){
-  .aeo-toggle, .aeo-overlay{ display:none !important; }
-}
 
 /* The bar loses the "Let's talk" pill to the panel below the nav breakpoint,
    so it gets shorter and scroll-margin has to follow it down. */
