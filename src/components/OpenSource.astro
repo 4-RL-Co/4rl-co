@@ -18,8 +18,13 @@
 import { Image } from 'astro:assets';
 import gumeHome from '../assets/gume-home.png';
 
+// The story is an internal link: it stays in the tab and takes the → arrow, so
+// it reads as "elsewhere on this site" rather than "off to another site" like
+// the three external ones. Placed after gume.club so the order is app, story,
+// then the two builder destinations.
 const links = [
   { label: 'gume.club', href: 'https://gume.club' },
+  { label: 'The story', href: '/journal/a-reading-log-you-can-fork', internal: true },
   { label: 'GitHub', href: 'https://github.com/4-RL-Co/gume-club' },
   { label: 'Discussions', href: 'https://github.com/4-RL-Co/gume-club/discussions' },
 ];
@@ -69,7 +74,11 @@ const links = [
           <p class="os__stat mono"><span class="os__num">~300K</span> Portuguese-language editions in the catalog</p>
           <nav class="os__links mono" aria-label="Gume">
             {links.map((l) => (
-              <a href={l.href} target="_blank" rel="noopener">{l.label} <span class="arr">↗</span></a>
+              <a
+                href={l.href}
+                target={l.internal ? undefined : '_blank'}
+                rel={l.internal ? undefined : 'noopener'}
+              >{l.label} <span class="arr">{l.internal ? '→' : '↗'}</span></a>
             ))}
           </nav>
         </div>
