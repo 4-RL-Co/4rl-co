@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <!-- Journal covers are drawn, never screenshots: cover-slash.svg is one bar of
+       the wordmark's "/" on black, and this is that same bar forking. One comes
+       down, splits, one arm carries on and the other diverges. One becomes two.
+
+       ONE path, not three stacked ones. Built from cover-slash.svg's own numbers:
+       the bar is 96 wide and runs (872,240) to (632,660), so it travels -240 over
+       420, a slope of -0.5714. Every vertex below falls out of that:
+         trunk at the split (y=450): x 752..848
+         the arm that carries on:    lands at 632..728, which is cover-slash's
+                                     own base, so it really is the same bar
+         the arm that diverges:      mirrors the slope, lands at 872..968
+         the crotch:                 (800,534), where the two inner edges cross
+       Change the slope and every number here has to be recomputed, which is the
+       reason they are written down rather than eyeballed. -->
+  <rect width="1600" height="900" fill="#0A0A0B"/>
+  <path d="M872 240 L968 240 L848 450 L968 660 L872 660 L800 534 L728 660 L632 660 Z" fill="#C6FF3A"/>
+</svg>
