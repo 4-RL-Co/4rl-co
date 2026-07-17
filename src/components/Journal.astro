@@ -1,0 +1,106 @@
+---
+// Journal on the home. It exists because the writing was invisible from here:
+// the only door was a nav link, so nobody knew there was anything to read.
+//
+// A horizontal scroller, NOT another row list. Work, Open Source and News are
+// all stacked rules-and-rows, and a fourth in that language turned the middle of
+// the page into one long list of links: 13 rows across four sections and roughly
+// four screens with no change of shape. Cards move sideways instead of down, the
+// covers put colour back on a page that had gone all type, and the reader drives
+// it, which is what separates this from the two marquees that drift on their own.
+import { articles } from '../data/journal.js';
+
+// newest first; the scroller handles however many there are
+const posts = [...articles].sort((a, b) => (a.date < b.date ? 1 : -1));
+---
+<section class="jn" id="journal" aria-label="Journal">
+  <div class="wrap">
+    <p class="seclabel reveal"><span class="n">03</span> <span class="slash">/</span> Journal</p>
+
+    <div class="jn__scroller reveal" data-d="1">
+      <ul class="jn__track">
+        {posts.map((a) => (
+          <li class="jn__item">
+            <a class="jn__card" href={`/journal/${a.slug}`}>
+              <span class={'jn__cover' + (a.cover ? '' : ' is-fallback')}>
+                {a.cover ? (
+                  <img src={a.cover} alt={a.coverAlt ?? ''} loading="lazy" decoding="async" />
+                ) : (
+                  <span class="jn__cover-title display">{a.title}</span>
+                )}
+              </span>
+              <span class="jn__meta mono">
+                {a.dateLabel} <span class="slash">/</span> {a.kicker ?? 'Manifesto'}
+              </span>
+              <span class="jn__name display">{a.title}</span>
+              <span class="jn__ex">{a.excerpt}</span>
+              <span class="jn__go mono">Read <span class="arr">↗</span></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <a class="pill jn__all" href="/journal">All writing <span class="arr">↗</span></a>
+  </div>
+</section>
+
+<style>
+  .jn{ padding-top:clamp(56px,8vh,100px); padding-bottom:clamp(56px,8vh,100px); }
+
+  /* The scroller bleeds to the right edge so a partially visible card signals
+     "there is more this way" without needing an arrow control. It only ever
+     scrolls when the cards actually overflow. */
+  .jn__scroller{
+    overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x proximity;
+    margin-right:calc(var(--pad) * -1);
+    padding-right:var(--pad);
+    padding-bottom:8px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--line) transparent;
+  }
+  .jn__scroller::-webkit-scrollbar{ height:3px; }
+  .jn__scroller::-webkit-scrollbar-track{ background:transparent; }
+  .jn__scroller::-webkit-scrollbar-thumb{ background:var(--line); border-radius:100px; }
+  .jn__scroller:hover::-webkit-scrollbar-thumb{ background:var(--ink-muted); }
+
+  .jn__track{
+    list-style:none; display:flex; gap:clamp(16px,2vw,28px);
+    width:max-content; max-width:none;
+  }
+  .jn__item{ scroll-snap-align:start; }
+  .jn__card{ display:block; width:clamp(260px,32vw,400px); }
+
+  .jn__cover{
+    display:block; aspect-ratio:16/9; overflow:hidden;
+    border:1px solid var(--line); border-radius:10px; background:var(--bg-elev);
+    transition:border-color .3s var(--ease);
+  }
+  .jn__cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .jn__cover.is-fallback{
+    display:flex; align-items:flex-end; padding:16px;
+    background:radial-gradient(120% 100% at 80% 15%, rgba(198,255,58,.12), transparent 60%), var(--bg-elev);
+  }
+  .jn__cover.is-fallback .jn__cover-title{ font-size:clamp(17px,1.8vw,24px); letter-spacing:-.03em; color:var(--ink); }
+  .jn__card:hover .jn__cover{ border-color:var(--accent); }
+
+  .jn__meta{ display:block; margin-top:16px; color:var(--ink-muted); }
+  .jn__name{
+    display:block; margin-top:10px;
+    font-size:clamp(20px,2vw,28px); letter-spacing:-.03em; line-height:1.08; color:var(--ink);
+    transition:color .3s var(--ease);
+  }
+  .jn__card:hover .jn__name{ color:var(--accent); }
+  .jn__ex{
+    display:block; margin-top:10px; color:var(--ink-muted);
+    font-size:clamp(13px,1.25vw,15px); line-height:1.5;
+  }
+  .jn__go{ display:inline-block; margin-top:14px; color:var(--accent); }
+
+  .jn__all{ margin-top:clamp(28px,4vh,44px); }
+
+  @media (prefers-reduced-motion: reduce){
+    .jn__scroller{ scroll-behavior:auto; scroll-snap-type:none; }
+  }
+</style>

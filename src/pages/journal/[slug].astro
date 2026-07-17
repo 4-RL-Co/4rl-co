@@ -1,15 +1,36 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
+import { Image } from 'astro:assets';
 import { articles } from '../../data/journal.js';
+
+// Figures are imported here, not in the data file, so astro:assets can optimise
+// them. A block references one by key; an unknown key renders nothing rather
+// than a broken image.
+import gumeEstante from '../../assets/journal/gume-estante.png';
+import gumeContribuidores from '../../assets/journal/gume-contribuidores.png';
+import gumeOQueFalta from '../../assets/journal/gume-o-que-falta.png';
+const FIGURES = {
+  'gume-estante': gumeEstante,
+  'gume-contribuidores': gumeContribuidores,
+  'gume-o-que-falta': gumeOQueFalta,
+};
 
 export function getStaticPaths() {
   return articles.map((a) => ({ params: { slug: a.slug }, props: { article: a } }));
 }
 const { article } = Astro.props;
 
-// auto reading time (~200 wpm)
-const words = article.blocks.map((b) => b.html || '').join(' ').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+// auto reading time (~200 wpm). Counts every block that carries prose, so a
+// long article stops being reported as a short one just because its words sit
+// in headings and lists rather than paragraphs.
+const words = article.blocks
+  .flatMap((b) => [b.html, b.caption, ...(b.items || [])])
+  .filter(Boolean)
+  .join(' ')
+  .replace(/<[^>]+>/g, ' ')
+  .split(/\s+/)
+  .filter(Boolean).length;
 const read = Math.max(1, Math.round(words / 200)) + ' min';
 
 // share links
@@ -46,7 +67,7 @@ const articleSchema = {
   <main class="art">
     <div class="wrap">
       <header class="art__head">
-        <p class="mono art__kicker reveal">Journal <span class="slash">/</span> Manifesto</p>
+        <p class="mono art__kicker reveal">Journal <span class="slash">/</span> {article.kicker ?? 'Manifesto'}</p>
         <h1 class="art__title display reveal" data-d="1">{article.title}</h1>
         <p class="art__dek reveal" data-d="1">{article.dek}</p>
         <div class="art__byline mono reveal" data-d="2">
@@ -69,8 +90,49 @@ const articleSchema = {
           {article.blocks.map((b) =>
             b.t === 'p' ? (
               <p class={'art__p reveal' + (b.drop ? ' has-drop' : '')} set:html={b.html} />
+            ) : b.t === 'h2' ? (
+              <h2 class="art__h2 display reveal" id={b.id} set:html={b.html} />
             ) : b.t === 'pull' ? (
               <p class={'art__pull display reveal' + (b.lime ? ' is-lime' : '')} set:html={b.html} />
+            ) : b.t === 'list' ? (
+              <ul class="art__list reveal">
+                {b.items.map((it) => (
+                  <li class="art__li"><span class="art__li-mark slash" aria-hidden="true">/</span><span set:html={it} /></li>
+                ))}
+              </ul>
+            ) : b.t === 'figure' && FIGURES[b.img] ? (
+              /* Figures break the 700px measure on purpose: these are wide
+                 product shots and the covers are the whole argument. */
+              <figure class="art__fig reveal">
+                {/* .grain wraps the image only: on the <figure> it would lay the
+                    speckle over the caption text too. */}
+                <span class="art__fig-media">
+                  <Image
+                    class="art__fig-img"
+                    src={FIGURES[b.img]}
+                    alt={b.alt}
+                    widths={[760, 1180, 1680]}
+                    sizes="(max-width: 860px) 100vw, (max-width: 1380px) 92vw, 1180px"
+                    format="webp"
+                    quality={74}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                {b.caption && <figcaption class="art__fig-cap mono" set:html={b.caption} />}
+              </figure>
+            ) : b.t === 'links' ? (
+              <div class="art__links reveal">
+                {b.items.map((l) => (
+                  <a class="art__link" href={l.href} target="_blank" rel="noopener">
+                    <span class="art__link-label mono">{l.label}</span>
+                    <span class="art__link-val">{l.value}</span>
+                    <span class="arr art__link-arr" aria-hidden="true">↗</span>
+                  </a>
+                ))}
+              </div>
+            ) : b.t === 'note' ? (
+              <p class="art__note reveal" set:html={b.html} />
             ) : b.t === 'divider' ? (
               <div class="art__div reveal" aria-hidden="true"><span class="slash">/</span></div>
             ) : b.t === 'signoff' ? (
@@ -108,9 +170,14 @@ const articleSchema = {
   .art__by-name{ color:var(--ink); }
   .art__by-date{ color:var(--ink-muted); }
 
-  /* two-column body: sticky share rail (left) + offset text column (right) */
+  /* two-column body: sticky share rail (left) + text column (right).
+     --measure is the text column, and the figure breakout below is derived from
+     it, so the two can never drift apart. 860px at this size is ~70 characters,
+     which is the top of the comfortable range and still leaves the long article
+     from feeling like a column pressed into the middle of a wide screen. */
   .art__content{
-    display:grid; grid-template-columns:180px minmax(0, 700px);
+    --measure:860px;
+    display:grid; grid-template-columns:180px minmax(0, var(--measure));
     column-gap:clamp(28px,6vw,96px);
     margin-top:clamp(56px,8vh,100px);
   }
@@ -120,17 +187,84 @@ const articleSchema = {
   .art__share a{ color:var(--ink-muted); transition:color .25s var(--ease); }
   .art__share a:hover{ color:var(--accent); }
 
-  .art__body{ max-width:700px; }
-  .art__p{ font-size:clamp(19px,1.5vw,23px); line-height:1.62; color:var(--ink); margin:0 0 1.4em; }
+  .art__body{ max-width:var(--measure); }
+  .art__p{ font-size:clamp(19px,1.6vw,25px); line-height:1.6; color:var(--ink); margin:0 0 1.4em; }
   .art__p.has-drop::first-letter{
     font-family:var(--font-display); font-weight:700; color:var(--accent);
     font-size:3.2em; line-height:.72; float:left; margin:.06em .12em 0 0;
   }
+  /* Links inside prose: underlined, because in a wall of text colour alone is
+     not a strong enough signal and it would spend the lime on every mention. */
+  .art__p :global(a), .art__note :global(a), .art__li :global(a){
+    color:var(--ink); text-decoration:underline;
+    text-decoration-color:var(--line); text-underline-offset:.22em; text-decoration-thickness:1px;
+    transition:color .25s var(--ease), text-decoration-color .25s var(--ease);
+  }
+  .art__p :global(a):hover, .art__note :global(a):hover, .art__li :global(a):hover{
+    color:var(--accent); text-decoration-color:var(--accent);
+  }
+  .art__p :global(strong), .art__li :global(strong){ color:var(--ink); font-weight:650; }
+
+  /* Section headings. Sized well under the h1 so the header still owns the page. */
+  .art__h2{
+    text-transform:uppercase; font-weight:700;
+    font-size:clamp(24px,2.7vw,38px); letter-spacing:-.03em; line-height:1.06;
+    margin:clamp(52px,7vh,84px) 0 clamp(20px,2.6vh,30px);
+    max-width:20ch;
+  }
+
   .art__pull{
     font-size:clamp(28px,3.8vw,52px); font-weight:700; letter-spacing:-.03em; line-height:1.04;
     color:var(--ink); margin:clamp(40px,6vh,72px) 0;
   }
   .art__pull.is-lime{ color:var(--accent); }
+
+  /* Lists: the "/" motif replaces the bullet. */
+  .art__list{ list-style:none; margin:0 0 1.6em; padding:0; }
+  .art__li{
+    position:relative; padding-left:1.7em;
+    font-size:clamp(18px,1.5vw,23px); line-height:1.58; color:var(--ink-muted);
+    margin-bottom:1.05em;
+  }
+  .art__li-mark{ position:absolute; left:0; top:.06em; font-size:1em; }
+
+  /* Figures break the measure: they run wider than the text column and centre
+     on it. Product shots are the receipt for the sentence above them. */
+  .art__fig{
+    --bleed:min(1180px, calc(100vw - var(--pad) * 2));
+    margin:clamp(44px,6vh,76px) 0;
+    width:var(--bleed);
+    /* centre the wider figure on the text column, whatever --measure is */
+    margin-left:calc((var(--measure) - var(--bleed)) / 2);
+  }
+  /* the media box clips both the image and the grain to the same rounded frame */
+  .art__fig-media{
+    display:block; overflow:hidden;
+    border:1px solid var(--line); border-radius:4px; background:var(--bg-elev);
+  }
+  .art__fig-img{ width:100%; height:auto; display:block; }
+  .art__fig-cap{ margin-top:14px; color:var(--ink-muted); text-transform:none; letter-spacing:.06em; }
+
+  /* The three links, as rows rather than inline text: this is the ask. */
+  .art__links{ margin:clamp(36px,5vh,60px) 0; border-top:1px solid var(--line); }
+  .art__link{
+    display:grid; grid-template-columns:120px 1fr auto; align-items:baseline;
+    gap:clamp(12px,2vw,28px); padding:20px 0; border-bottom:1px solid var(--line);
+    transition:padding-left .35s var(--ease);
+  }
+  .art__link:hover{ padding-left:12px; }
+  .art__link-label{ color:var(--ink-muted); }
+  .art__link-val{
+    font-family:var(--font-mono); font-size:clamp(14px,1.4vw,18px);
+    color:var(--ink); overflow-wrap:anywhere; transition:color .25s var(--ease);
+  }
+  .art__link:hover .art__link-val{ color:var(--accent); }
+  .art__link-arr{ color:var(--accent); }
+
+  .art__note{
+    margin-top:clamp(36px,5vh,56px); padding-top:26px; border-top:1px solid var(--line);
+    color:var(--ink-muted); font-size:clamp(14px,1.2vw,16px); font-style:italic;
+  }
   .art__div{ margin:clamp(32px,5vh,56px) 0; }
   .art__div .slash{ font-size:30px; }
   .art__signoff{
@@ -152,6 +286,10 @@ const articleSchema = {
     .art__share{ flex-direction:row; gap:22px; }
     .art__body, .art__foot{ max-width:none; }
     .art__p.has-drop::first-letter{ font-size:2.9em; }
+    /* the measure is the viewport here, so there is nothing left to break out of */
+    .art__fig{ width:100%; margin-left:0; }
+    .art__link{ grid-template-columns:1fr auto; }
+    .art__link-label{ display:none; }
   }
   @media (prefers-reduced-motion: reduce){ .art-progress{ display:none; } }
 </style>
