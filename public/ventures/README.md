@@ -6,7 +6,6 @@
 |---|---|---|
 | `smart-social.svg` | Smart Social | `smartsocial.svg`, already trimmed, copied as is |
 | `labepi.svg` | LabEpi | `labepi-vetores-12.svg`, viewBox retargeted to the ink |
-| `dlab-experts.png` | D.Lab Experts | `d.lablogo.png`, trimmed and capped at 240px tall |
 | `m1m1c-box.png` | M1m1c Box | `m1m1cbox.png`, trimmed and capped at 240px tall |
 
 Missing files are not an error: the row falls back to the venture name in the grotesque, and the build prints `[work] wordmark(s) missing` naming them. A broken image never reaches the page.
@@ -36,5 +35,4 @@ If coloured artwork ever replaces these, that is when the hover reveal becomes b
 |---|---|---|
 | Smart Social | `1` | Lockup with an icon; sets the reference. |
 | LabEpi | `0.92` | The circle icon overshoots the cap, so it reads tall at 1. |
-| D.Lab Experts | `0.8` | Pure wordmark whose glyphs fill the whole box, so it reads oversized at 1. |
 | M1m1c Box | `1.5` | A square badge, not a wordmark: its type is small inside the box, so it needs to grow to carry the same weight. |

@@ -1,24 +1,5 @@
 ---
-// Thesis + who's behind it, then the tools it is built with.
-// The stack marquee sits directly under "AI is the tool / not the hype" on
-// purpose: the headline makes the claim, the strip is the receipt. Icons are
-// pulled from simple-icons at build time (self-hosted, so no external request
-// and nothing for the CSP to block) and inlined as paths, which lets them take
-// currentColor and rest muted like the rest of the section.
-import { stack } from '../data/stack.js';
-import * as icons from 'simple-icons';
-
-const byslug = new Map(Object.values(icons).map((i) => [i.slug, i]));
-const tools = stack
-  .map((t) => {
-    const icon = byslug.get(t.slug);
-    if (!icon) return null; // a slug that stops resolving is dropped, never drawn empty
-    return { ...t, path: icon.path };
-  })
-  .filter(Boolean);
-
-const dropped = stack.filter((t) => !byslug.has(t.slug)).map((t) => t.name);
-if (dropped.length) console.warn(`[manifesto] no icon for: ${dropped.join(', ')}`);
+// Thesis + who's behind it.
 ---
 <section class="mf" id="about">
   <div class="wrap">
@@ -28,30 +9,6 @@ if (dropped.length) console.warn(`[manifesto] no icon for: ${dropped.join(', ')}
       <span class="mf__lede">Everything we build passes one filter: it's <span class="hl">real</span> and it <span class="serif">improves</span> something.</span>
       <span class="mf__punch">AI is the tool <span class="slash">/</span> not the hype.</span>
     </h2>
-
-    {tools.length > 0 && (
-      <div class="mf__stack reveal" data-d="2">
-        <p class="mono mf__stack-label">The stack</p>
-        {/* The strip is decorative and triples its contents to loop, so it is
-            hidden from assistive tech and the names are given once, in order,
-            just below. */}
-        <div class="marquee mf__marquee" aria-hidden="true">
-          {/* No "/" between logos. It separates words in the News strip, but each
-              logo is already its own object, so a slash there only doubles the
-              marks on the band. Spacing does the separating. */}
-          <div class="marquee__track">
-            {[...tools, ...tools, ...tools].map((t) => (
-              <span class="mf__tool">
-                <svg class="mf__logo" viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
-                  <path d={t.path} />
-                </svg>
-              </span>
-            ))}
-          </div>
-        </div>
-        <p class="vh">The stack: {tools.map((t) => t.name).join(', ')}.</p>
-      </div>
-    )}
 
     <div class="mf__grid">
       <div class="reveal" data-d="1">
@@ -84,23 +41,6 @@ if (dropped.length) console.warn(`[manifesto] no icon for: ${dropped.join(', ')}
   .mf__lede{ display:block; font-weight:500; }              /* lighter, fills the measure */
   .mf__punch{ display:block; font-weight:700; white-space:nowrap; margin-top:.42em; }  /* bold punch, one line */
   @media (max-width:640px){ .mf__punch{ white-space:normal; } }   /* wrap on small screens */
-  /* ---- stack marquee ----
-     Same construction as the "As seen in" strip in News: a mono label over a
-     hairline-ruled band. Logos rest at --ink-muted and only the one under the
-     cursor comes up to --ink, which is the move the Work rows and the sector
-     labels already make. */
-  .mf__stack{ margin-bottom:clamp(40px,6vw,80px); }
-  .mf__stack-label{ margin-bottom:16px; }
-  .mf__marquee{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:18px 0; }
-  .mf__tool{ display:inline-flex; align-items:center; padding:0 clamp(20px,2.8vw,42px); }
-  .mf__logo{
-    height:clamp(18px,1.8vw,26px); width:auto; display:block;
-    fill:var(--ink-muted);
-    transition:fill .35s var(--ease);
-  }
-  .mf__tool:hover .mf__logo{ fill:var(--ink); }
-  @media (prefers-reduced-motion: reduce){ .mf__logo{ transition:none; } }
-
   .mf__grid{
     display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,80px);
     border-top:1px solid var(--line); padding-top:clamp(28px,4vw,48px);

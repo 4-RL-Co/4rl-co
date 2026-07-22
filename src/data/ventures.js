@@ -1,4 +1,4 @@
-// The 4 ventures under 4/RL. Links use live sites where available.
+// The ventures under 4/RL. Links use live sites where available.
 //
 // `mark` is the wordmark filename under /public/ventures/. Work.astro checks it
 // at build time: present means the real wordmark renders, absent means the row
@@ -27,15 +27,6 @@ export const ventures = [
   },
   {
     idx: '03',
-    name: 'D.Lab Experts',
-    sector: 'Applied AI',
-    line: 'AI put to work where it moves the numbers.',
-    href: 'https://dlabexperts.com/',
-    mark: 'dlab-experts.png',
-    scale: 0.8,
-  },
-  {
-    idx: '04',
     name: 'M1m1c Box',
     sector: 'AI Cinema',
     line: 'Cinematic storytelling, made with AI.',
