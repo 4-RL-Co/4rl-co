@@ -196,7 +196,7 @@ html.js .reveal.in{ opacity:1; transform:none; }
 /* Tracks render their contents THREE times, so one copy is 33.3333% of the track
    and that is exactly how far the loop may travel. The old -50% stopped at 1.5
    copies, which is not a repeat boundary, so every cycle ended by snapping the
-   content sideways by half a copy (422px in News, 792px in the stack strip).
+   content sideways by half a copy (422px in News).
    Any change to the number of copies has to change this number with it. */
 @keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-33.3333%); } }
 .marquee{ overflow:hidden; white-space:nowrap; }
