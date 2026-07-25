@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 import { getLocale, LOCALES, LOCALE_META, homePath } from '../i18n/index.js';
 
 const {
@@ -181,8 +182,13 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={`{"token": "${cfToken}"}`}></script>
   )}
 
-  {/* Vercel first-party analytics (pageviews) — served from /_vercel/insights/* */}
+  {/* Vercel first-party, both same-origin under /_vercel/* so 'self' in the CSP
+     covers script and beacon with no policy change. Analytics = page views;
+     Speed Insights = field Core Web Vitals (the LCP/CLS/INP of real visits,
+     which is what validates the perf work). Both still need Web Analytics /
+     Speed Insights toggled on in the Vercel project dashboard to collect. */}
   <Analytics />
+  <SpeedInsights />
 
   <script>
     /* ---- Scroll reveals: never leave content hidden ---- */
