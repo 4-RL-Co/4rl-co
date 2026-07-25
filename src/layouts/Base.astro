@@ -20,6 +20,8 @@ const site = 'https://www.4real.ventures';
 const cfToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
 // Microsoft Clarity project id (public tag; kept in an env var, not in source).
 const clarityId = import.meta.env.PUBLIC_CLARITY_ID;
+// Google Analytics 4 measurement id (public; env-kept like the two above).
+const gaId = import.meta.env.PUBLIC_GA_ID;
 
 const isHome = Astro.url.pathname === '/';
 // The locale rides the route (Astro i18n); non-localized pages are English.
@@ -105,12 +107,22 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
   {import.meta.env.PROD && (
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data: https://*.clarity.ms; media-src 'self'; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.clarity.ms https://*.clarity.ms; connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data: https://*.clarity.ms https://www.google-analytics.com https://*.google-analytics.com; media-src 'self'; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.clarity.ms https://*.clarity.ms https://www.googletagmanager.com; connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.clarity.ms https://c.bing.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"
     />
   )}
   {/* Microsoft Clarity — loads early; project id comes from env, never hardcoded. */}
   {clarityId && (
     <script is:inline set:html={`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${clarityId}");`} />
+  )}
+  {/* Google Analytics 4 (gtag.js). Loader + config, both is:inline so Astro
+     leaves them untouched; measurement id comes from env, never hardcoded.
+     googletagmanager.com is in script-src, google-analytics.com in
+     connect-src/img-src (the /g/collect beacon, region variants included). */}
+  {gaId && (
+    <>
+      <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+      <script is:inline set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`} />
+    </>
   )}
   <!-- before-paint flags: reveal animation opt-in + preloader once-per-session -->
   <script is:inline>
@@ -126,6 +138,7 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
   <link rel="canonical" href={canonicalURL} />
   <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
   <link rel="dns-prefetch" href="https://www.clarity.ms" />
+  {gaId && <link rel="dns-prefetch" href="https://www.googletagmanager.com" />}
   <link rel="icon" href={site + '/favicon.ico'} sizes="any" />
   <link rel="shortcut icon" href={site + '/favicon.ico'} />
   <link rel="icon" type="image/png" sizes="512x512" href={site + '/favicon-512.png'} />
