@@ -176,7 +176,11 @@
 
 /* ---- reset ---- */
 *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
-html{ background:var(--bg); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; scroll-behavior:smooth; }
+/* overflow-x:clip on the root is the belt to body's suspenders: it stops any
+   single overflowing child from scrolling the whole document sideways, and
+   unlike overflow:hidden it creates no scroll container, so smooth scroll and
+   anchor jumps keep working. */
+html{ background:var(--bg); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; scroll-behavior:smooth; overflow-x:clip; }
 body{
   font-family:var(--font-body);
   background:var(--bg);

@@ -240,7 +240,13 @@ const heroShot = Object.values(shots)[0]?.default ?? null;
 
   @media (max-width:860px){
     .hero__coords{ display:none; }
-    .hero__support{ max-width:none; }
+    /* Stack the lower block: side by side, the glass card was flex-shrink:0
+       with no width cap, so it took the full unwrapped width of the thesis
+       sentence and blew past the frame (the source of the mobile side-scroll).
+       As a column it is a full-width block and the text wraps. */
+    .hero__lower{ flex-direction:column; align-items:stretch; margin-top:clamp(20px,4vh,40px); }
+    .hero__facts{ min-width:0; }
+    .hero__support{ max-width:none; align-self:stretch; }
     .hero__rule .caption{ width:100%; }
   }
   /* Short viewports: the chips are the first passengers off — their facts
