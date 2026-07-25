@@ -14,5 +14,5 @@
        Change the slope and every number here has to be recomputed, which is the
        reason they are written down rather than eyeballed. -->
   <rect width="1600" height="900" fill="#0A0A0B"/>
-  <path d="M872 240 L968 240 L848 450 L968 660 L872 660 L800 534 L728 660 L632 660 Z" fill="#C6FF3A"/>
+  <path d="M872 240 L968 240 L848 450 L968 660 L872 660 L800 534 L728 660 L632 660 Z" fill="#FFFFFF"/>
 </svg>

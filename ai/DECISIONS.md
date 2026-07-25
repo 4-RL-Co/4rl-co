@@ -12,6 +12,42 @@ covers what we chose and what we gave up to choose it.
 
 ---
 
+## 2026-07-25 — The lime is gone: the brand goes monochromatic
+
+**Decision.** The electric lime `#C6FF3A`, the founding "single surgical
+accent," is removed from the entire identity on the owner's call. The brand
+is now white on near-black, full stop. Emphasis carries by LUMINANCE, not
+hue: `--accent` is pure `#FFF` against the softer `#F2F2F3` ink, so the "/"
+and highlighted words read as the brightest thing on the page rather than the
+greenest.
+
+**Why it was cheap.** The whole point of the token system was this: `--accent`
+is the one dial. Retargeting `--lime` from green to white flipped every "/",
+every `.hl`, every focus ring, every solid CTA, the selection colour, the
+cursor, and the row/plate washes at once — the components never knew. The only
+hand-work was the raster/vector assets that baked the lime in.
+
+**The assets, mono.** The mark SVGs and the inline preloader lost their lime
+fill. The nav/footer wordmark was re-flattened all-white (the lime slash with
+it), via the artwork's own alpha as a mask. The favicon set was regenerated
+from the owner's `logomono.png` — a near-black rounded square with a white
+slash — so it reads on any tab (a bare white mark would vanish on light
+chrome), including a hand-built `favicon.ico`. The OG card had its lime slash
+and corner glow neutralized in place (pixel pass to white / neutral grey),
+keeping the exact typography. `og-image-lime.png` and `logomono.png` are
+archived in design-src.
+
+**What stayed.** The cinematic grades (plum, pine, umber, slate) are NOT the
+lime — they are the photography's colour, the "second colour from imagery"
+the brand always allowed. They remain. If the owner wants those gone too, that
+is a separate call.
+
+**Reversal.** Set `--lime` back to `#C6FF3A` / `--lime-deep` `#AEE62E` and the
+whole UI returns to green in one edit; the assets would need re-recolouring
+from the archived masters.
+
+---
+
 ## 2026-07-24 — Five languages: a language is a URL
 
 **Decision.** The site speaks English, Portuguese, Spanish, Chinese and
