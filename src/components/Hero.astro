@@ -186,7 +186,14 @@ const heroShot = Object.values(shots)[0]?.default ?? null;
       0 1px 2px rgba(0,0,0,.35),
       0 0 110px rgba(0,0,0,.3);
   }
-  .hero__slash{ color:var(--accent); display:inline-block; animation:slashPulse 3.2s var(--ease) infinite; }
+  /* :global because the headline lines come from the i18n dictionary via
+     set:html — Astro does NOT stamp its scope attribute onto injected markup,
+     so a plain scoped .hero__slash never matches the "/" span and it fell back
+     to ink (white) and lost its pulse. The other accents in the line, .serif
+     and .tech, work because they are global classes in global.css. Same trap
+     as the <Image> :global note above. slashPulse lives in global.css, so the
+     animation reference resolves. */
+  :global(.hero__slash){ color:var(--accent); display:inline-block; animation:slashPulse 3.2s var(--ease) infinite; }
 
 
   .hero__lower{
@@ -261,7 +268,7 @@ const heroShot = Object.values(shots)[0]?.default ?? null;
   .hero-in{ animation:heroIn .5s var(--ease) both; }
   @media (prefers-reduced-motion: reduce){
     .hero-in{ animation:none; }
-    .hero__slash{ animation:none; }
+    :global(.hero__slash){ animation:none; }
   }
 </style>
 
