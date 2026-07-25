@@ -506,7 +506,7 @@ html.js .reveal.in{ opacity:1; transform:none; }
   background:var(--bg); will-change:transform,opacity;
   animation:preFallback .5s var(--ease) 1.2s forwards;   /* no-JS safety: auto-hide */
 }
-.preloader img{ width:60px; height:60px; animation:markPulse 1.4s var(--ease) infinite; }
+.preloader img, .preloader__mark{ width:60px; height:60px; animation:markPulse 1.4s var(--ease) infinite; }
 .preloader.wipe{ animation:none; transform:translateY(-100%) skewY(-6deg); transition:transform .46s cubic-bezier(.7,0,.28,1); }
 .preloader.fade{ animation:none; opacity:0; transition:opacity .15s linear; }
 html.preloaded .preloader{ display:none; }   /* skip on later navigations (once per session) */

@@ -63,6 +63,14 @@ const shotFor = (file) =>
 // 21:9, which is the shape of the hero band, so the section closes on the same
 // frame it opened with.
 const layout = ['a', 'b', 'c'];
+// The `sizes` hint has to match the actual cell width or the browser picks a
+// source larger than it draws (PageSpeed flagged the tiles oversized): the
+// 7-span is ~58% of the 1680 column, the 5-span ~42%, the 12-span full width.
+const cellSizes = {
+  a: '(max-width: 860px) 100vw, 58vw',
+  b: '(max-width: 860px) 100vw, 42vw',
+  c: '100vw',
+};
 
 const rows = ventures.map((v, i) => ({
   ...v,
@@ -91,8 +99,8 @@ if (missing.length) {
                 <Image
                   src={v.shot}
                   alt=""
-                  widths={[640, 1080, 1600]}
-                  sizes="(max-width: 860px) 100vw, 60vw"
+                  widths={[420, 640, 1080, 1600]}
+                  sizes={cellSizes[v.span] ?? '100vw'}
                   format="webp"
                   quality={72}
                   loading="lazy"

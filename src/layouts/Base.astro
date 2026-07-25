@@ -159,8 +159,17 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
   {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 </head>
 <body>
+  {/* The mark is inlined, not <img src>. As an external SVG it was the LCP
+     element and waited on its own request to paint (a 650ms render delay in
+     the field). Inline, it paints with the first frame of HTML. */}
   <div class="preloader" id="preloader" aria-hidden="true">
-    <img src="/4rl-mark.svg" alt="4/RL Co. logo" width="60" height="60" />
+    <svg class="preloader__mark" viewBox="0 0 100 100" width="60" height="60" role="img" aria-label="4/RL Co.">
+      <mask id="preCut">
+        <rect x="10" y="10" width="80" height="80" rx="16" fill="#fff" />
+        <path d="M60 17 L73 17 L40 83 L27 83 Z" fill="#000" />
+      </mask>
+      <rect x="10" y="10" width="80" height="80" rx="16" fill="#C6FF3A" mask="url(#preCut)" />
+    </svg>
   </div>
 
   <div class="cursor" id="cursor" aria-hidden="true"></div>
