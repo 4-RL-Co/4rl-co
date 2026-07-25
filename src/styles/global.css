@@ -1,8 +1,8 @@
 /* =========================================================
    4/RL — design system
-   Premium editorial grid, monochromatic (white on near-black), and two
-   surfaces: paper and near-black. The site runs all-dark; paper stays as
-   a tested escape hatch.
+   Premium editorial grid, surgical electric lime accent (the logo itself is
+   monochromatic white — the lime is UI-only), on a dark ground. The site
+   runs all-dark; the paper layer stays as a tested escape hatch.
 
    How the two surfaces work: a section declares .surface--light or
    .surface--dark and REMAPS the tokens the whole system already reads
@@ -10,10 +10,11 @@
    block is written twice, and a component that only ever touched those
    variables is correct on both surfaces without being edited.
 
-   The accent is monochromatic white (2026-07-25): the brand dropped the
-   electric lime, so on the dark ground --accent is pure white and emphasis
-   is a matter of luminance, not hue. On the (now-unused) paper layer it
-   still resolves to ink. --lime keeps its name; only its value is white.
+   The lime lives in the UI only: --accent resolves to it on the dark ground,
+   so every "/", highlight, focus ring and solid CTA carries it. The LOGO is
+   the exception — mark, favicon, wordmark and preloader are monochromatic
+   white, drawn that way in their own files, no --accent involved. On the
+   (now-unused) paper layer --accent resolves to ink.
    ========================================================= */
 
 /* ---- Fonts (self-hosted via Fontsource, font-display: swap) ---- */
@@ -57,15 +58,14 @@
 
 :root{
   /* ---- the accent (never remapped) ----
-     Monochromatic since 2026-07-25: the brand dropped the electric lime and
-     the identity is now white on near-black. Emphasis carries by LUMINANCE,
-     not hue — the accent is pure #FFF against the softer #F2F2F3 ink, so the
-     "/" and highlighted words read as the brightest thing on the page. The
-     variable keeps the name --lime for continuity of everything that reads
-     it; only its value changed. --accent-deep is the dimmer white for
-     pressed/hover fills. */
-  --lime:#FFFFFF;
-  --lime-deep:#DCDCDE;
+     Electric lime is the UI accent again (2026-07-25). The one thing it is
+     NOT anymore is the LOGO: the mark, the favicon set, the wordmark and the
+     preloader are monochromatic white on their own, deliberately — the
+     identity reads mono, the interface keeps its surgical spark. So the lime
+     lives only where --accent/--lime is read in CSS; the logo assets carry no
+     green. */
+  --lime:#C6FF3A;        /* electric lime — the UI accent (never the logo) */
+  --lime-deep:#AEE62E;
   --near-black:#0A0A0B;
 
   /* ---- paper layer ----
@@ -98,8 +98,8 @@
   --accent-deep:var(--lime-deep);
   --accent-on:#0A0A0B;   /* the ink that sits ON --accent */
   --line:#232327;
-  --tint-1:rgba(255,255,255,.05);   /* row wash */
-  --tint-2:rgba(255,255,255,.12);   /* plate wash */
+  --tint-1:rgba(198,255,58,.05);   /* row wash */
+  --tint-2:rgba(198,255,58,.12);   /* plate wash */
 
   --font-display:"Space Grotesk Variable", "Space Grotesk Variable fallback", system-ui, sans-serif;
   --font-tech:"Michroma", system-ui, sans-serif;
@@ -168,8 +168,8 @@
   --accent:var(--lime);
   --accent-deep:var(--lime-deep);
   --accent-on:#0A0A0B;
-  --tint-1:rgba(255,255,255,.05);
-  --tint-2:rgba(255,255,255,.12);
+  --tint-1:rgba(198,255,58,.05);
+  --tint-2:rgba(198,255,58,.12);
   color:var(--ink);
   color-scheme:dark;
   /* Film grain. A flat #0A0A0B reads as a void next to sections that carry
@@ -536,7 +536,7 @@ html.preloaded .preloader{ display:none; }   /* skip on later navigations (once 
   mix-blend-mode:difference; opacity:0;
 }
 .cursor-dot{ width:5px; height:5px; background:var(--lime); transform:translate(-50%,-50%); opacity:0; }
-.cursor.is-hover{ width:64px; height:64px; background:rgba(255,255,255,.12); }
+.cursor.is-hover{ width:64px; height:64px; background:rgba(198,255,58,.12); }
 @media (hover:none),(pointer:coarse){ .cursor,.cursor-dot{ display:none; } }
 
 /* The ring is tuned for dark: mix-blend-mode:difference on a lime border is

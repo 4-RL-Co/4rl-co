@@ -12,20 +12,20 @@ covers what we chose and what we gave up to choose it.
 
 ---
 
-## 2026-07-25 — The lime is gone: the brand goes monochromatic
+## 2026-07-25 — The logo goes monochromatic; the lime stays in the UI
 
-**Decision.** The electric lime `#C6FF3A`, the founding "single surgical
-accent," is removed from the entire identity on the owner's call. The brand
-is now white on near-black, full stop. Emphasis carries by LUMINANCE, not
-hue: `--accent` is pure `#FFF` against the softer `#F2F2F3` ink, so the "/"
-and highlighted words read as the brightest thing on the page rather than the
-greenest.
+**Decision (final, after a same-day round trip).** The LOGO drops the lime and
+is monochromatic white — the mark, the favicon set, the wordmark and the
+preloader carry no green, drawn white in their own files. The lime `#C6FF3A`
+stays everywhere else: it is the UI accent, so every "/", highlight, focus
+ring, solid CTA, selection, cursor and row/plate wash still carries it.
 
-**Why it was cheap.** The whole point of the token system was this: `--accent`
-is the one dial. Retargeting `--lime` from green to white flipped every "/",
-every `.hl`, every focus ring, every solid CTA, the selection colour, the
-cursor, and the row/plate washes at once — the components never knew. The only
-hand-work was the raster/vector assets that baked the lime in.
+**The round trip, honestly.** The first cut removed the lime from EVERYTHING
+(commit 0a0103c: `--accent` retargeted to pure white, emphasis by luminance).
+The owner then scoped it back: lime in the UI, mono only on the logo. So the
+CSS tokens returned to lime and the logo assets stayed white. The token system
+made both directions a one-line flip — the components never knew either time;
+only the baked-in raster/vector assets took hand-work.
 
 **The assets, mono.** The mark SVGs and the inline preloader lost their lime
 fill. The nav/footer wordmark was re-flattened all-white (the lime slash with
