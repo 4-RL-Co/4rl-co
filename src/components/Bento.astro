@@ -1,0 +1,170 @@
+---
+// 05 / Journal · Press — the bento, journal-first. The press tried life as a
+// tile and read as a stranger at the table (headlines are rows, not cards),
+// so it stepped down to what it structurally is: one quiet strip under the
+// grid, flagship headline plus the "as seen in" roll. The tiles are the
+// writing: featured post, second post, and the CTA card. Covers come from
+// journal.js and the tiles are ready for photographic ones — the image fills
+// the frame, cover-cropped, with the text below on its own surface.
+import { articles } from '../data/journal.js';
+import { news, outlets } from '../data/news.js';
+import { getLocale, getDict } from '../i18n/index.js';
+import { getPages, localePathFor } from '../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+const P = getPages(locale);
+const lp = (p) => localePathFor(locale, p);
+const jp = (a) => P.journalPosts[a.slug] ?? {};
+
+const posts = [...articles].sort((a, b) => (a.date < b.date ? 1 : -1));
+const featured = posts[0];
+const second = posts[1] ?? null;
+const flagship = news.find((n) => n.flagship) ?? news[0];
+---
+<section class="bt surface surface--dark surface--deep" id="news" aria-label="Journal and press">
+  <div class="wrap">
+    <p class="seclabel reveal"><span class="n">05</span> <span class="slash">/</span> {t.bt.label}</p>
+
+    <div class="bt__grid">
+      <a class="bt__tile bt__post bt__a reveal" href={lp(`/journal/${featured.slug}`)}>
+        <span class={'bt__cover' + (featured.cover ? '' : ' is-fallback')} style={featured.coverIcon ? `--cover-icon:url('${featured.coverIcon}')` : undefined}>
+          {featured.cover && <img src={featured.cover} alt={featured.coverAlt ?? ''} loading="lazy" decoding="async" />}
+        </span>
+        <span class="bt__body">
+          <span class="bt__kicker mono">{featured.dateLabel} <span class="slash">/</span> {featured.kicker ?? 'Journal'}</span>
+          <span class="bt__title display">{jp(featured).title ?? featured.title}</span>
+          <span class="bt__ex">{jp(featured).excerpt ?? featured.excerpt}</span>
+          <span class="bt__go mono">{t.bt.read} <span class="arr">→</span></span>
+        </span>
+      </a>
+
+      {second && (
+        <a class="bt__tile bt__post bt__b reveal" data-d="1" href={lp(`/journal/${second.slug}`)}>
+          <span class={'bt__cover' + (second.cover ? '' : ' is-fallback')} style={second.coverIcon ? `--cover-icon:url('${second.coverIcon}')` : undefined}>
+            {second.cover && <img src={second.cover} alt={second.coverAlt ?? ''} loading="lazy" decoding="async" />}
+          </span>
+          <span class="bt__body">
+            <span class="bt__kicker mono">{second.dateLabel} <span class="slash">/</span> {second.kicker ?? 'Journal'}</span>
+            <span class="bt__title display">{jp(second).title ?? second.title}</span>
+            <span class="bt__ex">{jp(second).excerpt ?? second.excerpt}</span>
+            <span class="bt__go mono">{t.bt.read} <span class="arr">→</span></span>
+          </span>
+        </a>
+      )}
+
+      <div class="bt__tile bt__cta bt__d reveal" data-d="2">
+        <div>
+          <p class="bt__cta-title display" set:html={t.bt.ctaTitle} />
+          <p class="bt__cta-line">{t.bt.ctaLine}</p>
+        </div>
+        <div class="bt__cta-row">
+          <a class="pill pill--solid" href={lp("/journal")}>{t.bt.all} <span class="arr">→</span></a>
+          <a class="pill" href={lp("/studio")}>{t.bt.studio} <span class="arr">→</span></a>
+        </div>
+      </div>
+    </div>
+
+    {/* The press, at its real size: one hairline strip. The flagship headline
+        is a citation and keeps its original language; the roll is text on
+        purpose — this site does not do logo soup. */}
+    <div class="bt__press reveal" data-d="2">
+      <span class="caption bt__press-label">{t.bt.press}</span>
+      <a class="bt__press-flag" href={flagship.href} target="_blank" rel="noopener">
+        <span class="mono bt__press-outlet">{flagship.outlet} <span class="slash">/</span> {flagship.year}</span>
+        <span class="bt__press-title">{flagship.title}</span>
+        <span class="arr" aria-hidden="true">↗</span>
+      </a>
+      <span class="caption bt__press-seen">{t.bt.seen} {outlets.join(' / ')}</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bt{ padding-top:clamp(64px,10vh,120px); padding-bottom:clamp(64px,10vh,130px); }
+
+  .bt__grid{
+    display:grid; grid-template-columns:repeat(12,1fr);
+    gap:clamp(12px,1.6vw,24px);
+    align-items:stretch;
+  }
+  .bt__a{ grid-column:span 7; }
+  .bt__b{ grid-column:span 5; }
+  .bt__d{ grid-column:span 12; }
+
+  .bt__tile{
+    display:flex; flex-direction:column;
+    border-radius:var(--radius-lg); border:1px solid var(--line);
+    background:var(--bg-elev); overflow:hidden;
+    transition:transform .45s var(--ease), border-color .45s var(--ease);
+  }
+  .bt__tile:hover{ transform:translateY(-4px); }
+  a.bt__tile:hover{ border-color:var(--ink-muted); }
+
+  /* post tiles — covers speak the plate language: the photograph softened
+     into a field, grain over it, and the mark centered on top as the graphic
+     element. Same film as the venture tiles, one degree quieter. */
+  .bt__cover{ display:block; position:relative; aspect-ratio:16 / 9; overflow:hidden; background:var(--grade-slate); }
+  .bt__cover img{ width:100%; height:100%; object-fit:cover; display:block; filter:blur(8px) saturate(1.05); transform:scale(1.06); }
+  .bt__cover::before{
+    content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:var(--grain), var(--grain), linear-gradient(180deg, transparent 45%, rgba(0,0,0,.4) 100%);
+  }
+  /* The icon is per-post, white, named in journal.js (--cover-icon). No
+     icon, no overlay: the pseudo needs the variable to paint anything. */
+  .bt__cover::after{
+    content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:var(--cover-icon, none) center / 44px 44px no-repeat;
+    filter:drop-shadow(0 4px 18px rgba(0,0,0,.55));
+  }
+  .bt__cover.is-fallback{ background:radial-gradient(120% 100% at 80% 15%, var(--tint-2), transparent 60%), var(--bg-elev); }
+  .bt__body{ display:flex; flex-direction:column; gap:10px; padding:clamp(18px,2.2vw,28px); flex:1; }
+  .bt__kicker{ color:var(--ink-muted); }
+  .bt__title{
+    font-size:clamp(20px,2.1vw,30px); letter-spacing:-.03em; line-height:1.06;
+    color:var(--ink);
+  }
+  .bt__ex{ color:var(--ink-muted); font-size:clamp(13px,1.25vw,15px); line-height:1.5; max-width:52ch; }
+  .bt__go{ margin-top:auto; padding-top:6px; color:var(--ink); }
+
+  /* CTA tile — one wide horizontal card closing the grid */
+  .bt__cta{
+    flex-direction:row; align-items:center; justify-content:space-between;
+    gap:clamp(20px,3vw,48px); flex-wrap:wrap;
+    padding:clamp(22px,2.8vw,40px); background:var(--bg-elev);
+  }
+  .bt__cta-title{
+    text-transform:uppercase; font-size:clamp(24px,2.8vw,44px);
+    letter-spacing:-.04em; line-height:.98;
+  }
+  .bt__cta-line{ margin-top:8px; color:var(--ink-muted); font-size:clamp(13px,1.3vw,16px); max-width:46ch; }
+  /* The outline pill needs a stronger hairline on graphite than --line gives:
+     at these values the default border reads as absent, not subtle. */
+  .bt__cta-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .bt__cta-row .pill:not(.pill--solid){ border-color:rgba(255,255,255,.22); }
+
+  /* press strip */
+  .bt__press{
+    display:flex; align-items:baseline; gap:clamp(16px,2.6vw,40px);
+    margin-top:clamp(28px,4vh,44px); padding-top:18px;
+    border-top:1px solid var(--line);
+  }
+  .bt__press-flag{
+    display:flex; align-items:baseline; gap:12px; min-width:0;
+    transition:color .25s var(--ease);
+  }
+  .bt__press-outlet{ color:var(--ink-muted); white-space:nowrap; }
+  .bt__press-title{
+    color:var(--ink); font-size:clamp(13px,1.3vw,15px);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .bt__press-flag:hover .bt__press-title{ text-decoration:underline; text-underline-offset:.16em; text-decoration-thickness:1px; }
+  .bt__press-seen{ margin-left:auto; white-space:nowrap; }
+
+  @media (max-width:860px){
+    .bt__a, .bt__b{ grid-column:span 12; }
+    .bt__press{ flex-wrap:wrap; }
+    .bt__press-title{ white-space:normal; }
+    .bt__press-seen{ margin-left:0; width:100%; }
+  }
+</style>

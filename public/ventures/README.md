@@ -12,9 +12,11 @@ Missing files are not an error: the row falls back to the venture name in the gr
 
 ## How a mark is rendered
 
-Every mark here is white artwork, which makes `brightness()` a colour dial on it. The row rests at `brightness(.541)`, landing white on `#8A8A8A` (`--ink-muted`), and goes to `brightness(.95)` on hover, landing it on `#F2F2F2` (`--ink`). So the marks sit quiet and the hovered row steps forward, which is the move `.work__sector` already makes. Black knockouts, such as the "S" in the Smart Social tile, stay black either way.
+Each mark is centred in its own tile, on that venture's stop of the cinematic grade (`grade` in `src/data/ventures.js`). The grade is always a dark ground, whichever surface the section itself is on, so the marks are read against the same value everywhere.
 
-Marks rest muted on purpose: at full white a row of four logos shouts over the copy beside it and the section stops reading as one system.
+Every mark here is white artwork, which makes `brightness()` a colour dial on it. The mark rests at `brightness(.86)` and goes to `1` on hover, which is the same step the tile's line of copy makes underneath it. Black knockouts, such as the "S" in the Smart Social tile, stay black either way.
+
+Marks rest slightly held back on purpose: at full white they sit in front of the grade rather than in it, and the tiles stop reading as one shoot.
 
 **There is no hover colour**, because none of the supplied files contain a brand colour to reveal.
 
@@ -22,8 +24,8 @@ If coloured artwork ever replaces these, that is when the hover reveal becomes b
 
 ## What a replacement file has to be
 
-- **Trimmed to the ink.** No padding inside the `viewBox` or the canvas. Rows are aligned by capping every mark to the same height, so built-in whitespace makes a mark sit small or off the line. Three of the four originals were square canvases and had to be trimmed before they could be used.
-- **Carrying its real dimensions.** The aspect ratio is read at build time from the SVG `viewBox` or the PNG header, which reserves the mark's width before the file loads and stops the row reflowing.
+- **Trimmed to the ink.** No padding inside the `viewBox` or the canvas. Tiles are aligned by capping every mark to the same height, so built-in whitespace makes a mark sit small or off the line. Three of the four originals were square canvases and had to be trimmed before they could be used.
+- **Carrying its real dimensions.** The aspect ratio is read at build time from the SVG `viewBox` or the PNG header, which reserves the mark's width before the file loads and stops the tile reflowing.
 - **Filled paths, not live text.** Convert type to outlines so nothing depends on a font being present.
 - **SVG for anything typographic.** PNG works, but cap it near 240px tall. The originals were 4500² and 3000², which is roughly 70x more pixels than the row ever draws.
 
@@ -35,4 +37,4 @@ If coloured artwork ever replaces these, that is when the hover reveal becomes b
 |---|---|---|
 | Smart Social | `1` | Lockup with an icon; sets the reference. |
 | LabEpi | `0.92` | The circle icon overshoots the cap, so it reads tall at 1. |
-| M1m1c Box | `1.5` | A square badge, not a wordmark: its type is small inside the box, so it needs to grow to carry the same weight. |
+| M1m1c Box | `1.15` | A square badge, not a wordmark: its type is small inside the box, so it needs to grow to carry the same weight. |

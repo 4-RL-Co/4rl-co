@@ -1,0 +1,40 @@
+---
+// A display-size ticker on the deep ground, between the Work grid and the
+// first sheet: the sectors the studio actually runs, drifting past with the
+// "/" as the separator. It borrows the reference's marquee-with-glyphs move
+// and speaks it in this site's primitives — the strip reuses .marquee (3
+// copies, shared px/s timing from Base.astro, reduced-motion off switch),
+// and the separator is the brand's slash, not a decorative asterisk.
+// aria-hidden with a .vh sentence, same accessibility contract News used.
+import { getLocale, getDict } from '../i18n/index.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+const items = t.ticker;
+---
+<div class="tk surface surface--dark surface--deep" aria-label="What the studio runs">
+  <p class="vh">{items.join(" / ")}</p>
+  <div class="marquee tk__marquee" aria-hidden="true">
+    <div class="marquee__track">
+      {[...items, ...items, ...items].map((t) => (
+        <span class="tk__item display">{t}<span class="slash"> / </span></span>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .tk{ padding:clamp(28px,4vh,48px) 0; }
+  .tk__marquee{
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    padding:clamp(14px,2vh,24px) 0;
+  }
+  /* The cover's banner register: the wordmark's own face, letterspaced. */
+  .tk__item{
+    font-family:var(--font-tech); font-weight:400;
+    letter-spacing:.06em; text-transform:uppercase;
+    font-size:clamp(16px,2.4vw,36px); color:var(--ink-muted);
+    padding:0 10px; white-space:nowrap;
+  }
+  .tk__item .slash{ font-size:.9em; }
+</style>

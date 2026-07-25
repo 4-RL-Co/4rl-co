@@ -1,12 +1,18 @@
 ---
+// Section order is the argument: what we can do (01), what we own (02), what we
+// give away (03), why (04), what we write and who noticed (05, one bento), how
+// to reach us (06). One dark world, two values: the deep near-black is the
+// ground (hero, 01, 02, the bento), and graphite floats on it as sheets (Open
+// Source, Manifesto, Contact) and tiles. Elevation replaced the paper.
 import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
+import Capabilities from '../components/Capabilities.astro';
 import Work from '../components/Work.astro';
+import Ticker from '../components/Ticker.astro';
 import OpenSource from '../components/OpenSource.astro';
-import Journal from '../components/Journal.astro';
-import News from '../components/News.astro';
 import Manifesto from '../components/Manifesto.astro';
+import Bento from '../components/Bento.astro';
 import FAQ from '../components/FAQ.astro';
 import Footer from '../components/Footer.astro';
 ---
@@ -14,12 +20,15 @@ import Footer from '../components/Footer.astro';
   <Nav />
   <main>
     <Hero />
+    <Capabilities />
     <Work />
+    <Ticker />
     <OpenSource />
-    <Journal />
-    <News />
     <Manifesto />
+    <Bento />
     <FAQ />
     <Footer />
   </main>
 </Base>
+
+

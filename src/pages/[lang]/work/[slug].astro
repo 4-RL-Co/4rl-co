@@ -1,0 +1,16 @@
+---
+// Localized wrapper. Astro pages import cleanly as components: the page body
+// self-localizes from Astro.currentLocale, so this file only multiplies the
+// routes by language and forwards the same props the root route builds.
+import Page from '../../work/[slug].astro';
+import { ventures } from '../../../data/ventures.js';
+
+export function getStaticPaths() {
+  return ['pt', 'es', 'zh', 'ru'].flatMap((lang) =>
+    ventures.map((v) => ({ params: { lang, slug: v.slug }, props: { venture: v } }))
+  );
+}
+
+const { venture } = Astro.props;
+---
+<Page venture={venture} />

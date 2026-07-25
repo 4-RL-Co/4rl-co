@@ -1,37 +1,10 @@
 ---
 // FAQ structured data (FAQPage JSON-LD) — no visible markup on purpose.
 // Answer engines (ChatGPT, Claude, Perplexity, Google AI Overviews) consume the
-// JSON-LD directly, so we keep the AEO value without rendering anything on the page.
-const faqs = [
-  {
-    q: 'What is 4/RL Co.?',
-    a: '4/RL Co. is an independent AI venture studio based in São Paulo, Brazil. We build and operate our own companies that put artificial intelligence to work on real problems, across influence, education, applied AI and cinema.',
-  },
-  {
-    q: 'What does "4/RL" mean?',
-    a: '"4/RL" reads as "for real." The slash is the line every project has to cross, from promise to proof. Our thesis fits in one sentence: improve the world with AI, for real.',
-  },
-  {
-    q: 'What companies does 4/RL operate?',
-    a: 'Three ventures: Smart Social (an influence and media network), LabEpi (teaching epidemiology and the scientific method), and M1m1c Box (cinematic storytelling made with AI).',
-  },
-  {
-    q: 'Is 4/RL an agency or a consultancy?',
-    a: 'Neither. We do not sell a service. We own our ventures and operate them for the long haul: we start companies and run them.',
-  },
-  {
-    q: 'Who founded 4/RL?',
-    a: '4/RL was founded by Gabriel Olegário, an advertiser and builder in São Paulo who sets the direction and ships the work.',
-  },
-  {
-    q: 'Where is 4/RL based and what languages does it work in?',
-    a: '4/RL is based in São Paulo, Brazil, and works with partners and audiences worldwide in Portuguese and English.',
-  },
-  {
-    q: 'How can I get in touch with 4/RL?',
-    a: 'Email olegas@4real.ventures, or reach out on WhatsApp, LinkedIn, GitHub or Telegram, all linked in the footer.',
-  },
-];
+// JSON-LD directly, so we keep the AEO value without rendering anything on the
+// page. The visible version of the same questions lives on /studio, which
+// imports the same data and deliberately does NOT emit a second FAQPage block.
+import { faqs } from '../data/faq.js';
 
 // FAQPage schema — one Question/Answer node per entry, answers verbatim.
 const faqSchema = {

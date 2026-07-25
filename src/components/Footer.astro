@@ -1,4 +1,11 @@
 ---
+import { Image } from 'astro:assets';
+import contactBg from '../assets/contact-bg.jpg';
+import { getLocale, getDict } from '../i18n/index.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+
 const email = 'olegas@4real.ventures';
 const socials = [
   { label: 'WhatsApp', href: 'https://wa.me/5511933279420' },
@@ -8,18 +15,37 @@ const socials = [
 ];
 const year = 2026;
 ---
-<section class="contact" id="contact">
+<section class="sheetwrap sheetwrap--last" id="contact">
+  <div class="contact surface surface--dark sheet">
+  {/* The closing sheet gets a horizon: one of the film's frames, blurred past
+      recognition into an atmosphere, under a scrim that keeps every token
+      contrast intact. Decoration, so it is empty-alt and lazy. */}
+  <Image
+    class="contact__bg"
+    src={contactBg}
+    alt=""
+    widths={[960, 1600]}
+    sizes="100vw"
+    format="webp"
+    quality={60}
+    loading="lazy"
+    decoding="async"
+  />
+  <div class="contact__scrim" aria-hidden="true"></div>
   <div class="wrap">
-    <p class="seclabel reveal"><span class="n">06</span> <span class="slash">/</span> Contact</p>
+    <p class="seclabel reveal"><span class="n">06</span> <span class="slash">/</span> {t.contact.label}</p>
 
-    <a class="contact__big display reveal" href={'mailto:' + email}>
-      Let's <span class="serif">build</span><br />something <span class="hl">real</span><span class="slash">.</span>
-    </a>
+    <a class="contact__big display reveal" href={'mailto:' + email} set:html={t.contact.big} />
 
     <div class="contact__grid reveal" data-d="1">
       <a class="contact__mail" href={'mailto:' + email}>{email} <span class="arr">↗</span></a>
-      <nav class="contact__socials mono" aria-label="Social">
-        {socials.map((s) => (<a href={s.href} target="_blank" rel="noopener">{s.label}</a>))}
+      {/* Pills, not bare links — the same object the nav and the CTAs already
+          use, which is what the circular icon buttons in the reference are
+          doing for that site. Icons would need brand SVGs vendored into the
+          repo (the CSP takes nothing from a CDN), and simple-icons was removed
+          deliberately two days ago; text in the mono is the 4/RL version. */}
+      <nav class="contact__socials" aria-label="Social">
+        {socials.map((s) => (<a class="pill" href={s.href} target="_blank" rel="noopener">{s.label}</a>))}
       </nav>
     </div>
   </div>
@@ -27,17 +53,36 @@ const year = 2026;
   <footer class="foot">
     <div class="wrap foot__row">
       <span class="foot__brand">
-        <img class="foot__mark" src="/4rl-mark.svg" alt="4/RL Co. logo" width="19" height="19" />
-        <span class="foot__logo display">4<span class="slash">/</span>RL</span>
+        <img class="foot__wordmark" src="/4rl-wordmark.png" alt="4/RL Co." width="871" height="132" />
       </span>
-      <span class="mono">São Paulo, BR</span>
+      {/* The coordinates are the technical-sheet layer the rest of the page
+          speaks in (section indices, mono captions, crop marks). They say the
+          same thing "São Paulo, BR" says, more precisely, which is the whole
+          register: a studio states where it is, to four decimal places. */}
+      <span class="mono foot__place">
+        {t.contact.place}
+        <span class="foot__sep" aria-hidden="true"><span class="slash">/</span></span>
+        <span class="coords">23.5505° S / 46.6333° W</span>
+      </span>
       <span class="mono">© {year} 4/RL Co.</span>
     </div>
   </footer>
+  </div>
 </section>
 
 <style>
-  .contact{ padding-top:clamp(64px,9vh,120px); }
+  /* A sheet interior now: the room the hard cut needed lives in the card. */
+  .contact{ position:relative; padding-top:clamp(56px,8vh,96px); }
+  .contact__bg{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    filter:blur(22px) saturate(1.1); transform:scale(1.1);
+    opacity:.5;
+  }
+  .contact__scrim{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(16,16,20,.55), rgba(16,16,20,.9) 78%);
+  }
+  .contact > .wrap, .contact > .foot{ position:relative; z-index:1; }
   .contact__big{
     display:block; text-transform:uppercase;
     font-size:clamp(44px,10vw,180px); letter-spacing:-.045em; line-height:.9;
@@ -51,13 +96,16 @@ const year = 2026;
   }
   .contact__mail{ font-family:var(--font-mono); font-size:clamp(14px,1.6vw,20px); }
   .contact__mail:hover{ color:var(--accent); }
-  .contact__socials{ display:flex; gap:clamp(14px,2vw,32px); flex-wrap:wrap; }
-  .contact__socials a{ color:var(--ink-muted); transition:color .25s var(--ease); }
-  .contact__socials a:hover{ color:var(--accent); }
+  .contact__socials{ display:flex; gap:10px; flex-wrap:wrap; }
+  .contact__socials .pill{ color:var(--ink-muted); }
+  .contact__socials .pill:hover{ color:var(--accent); }
 
   .foot{ border-top:1px solid var(--line); }
   .foot__row{ display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; padding-top:44px; padding-bottom:80px; }
-  .foot__brand{ display:inline-flex; align-items:center; gap:10px; }
-  .foot__mark{ width:19px; height:19px; display:block; }
-  .foot__logo{ font-size:20px; }
+  .foot__brand{ display:inline-flex; align-items:center; }
+  /* Same asset as the nav, one step smaller: the footer states the brand, it
+     doesn't announce it. Width comes from the file's own ratio. */
+  .foot__wordmark{ height:19px; width:auto; display:block; }
+  .foot__place{ display:inline-flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .foot__sep{ opacity:.7; }
 </style>

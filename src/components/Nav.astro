@@ -1,80 +1,269 @@
 ---
-// Top bar with an accessible mobile menu
+// Floating nav, three objects (the HA structure): logo chip on the left, the
+// link pill dead-centre, the CTA on the right. Each is its own piece of dark
+// glass, so together they read as instruments laid on the page rather than as
+// a bar across it.
+//
+// "Work" carries a dropdown with the ventures (the HA CONTEÚDOS move): pure
+// CSS, opened by hover AND by :focus-within so the keyboard gets the same
+// menu, and the trigger itself stays a real link to the Work section — the
+// dropdown is a shortcut, never the only door. On the mobile panel the
+// ventures render inline under Work instead: a hover dropdown has no hover
+// to live on there.
+//
+// The CTA is the one white object: solid white with ink type, bright on the
+// dark ground, held by its hairline anywhere else.
+import { ventures } from '../data/ventures.js';
+import { getLocale, getDict, homePath, LOCALES, LOCALE_META } from '../i18n/index.js';
+import { localePathFor } from '../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+// Hash links point at THIS locale's home; the deep pages are English and
+// their links stay absolute.
+const h = homePath(locale);
+const lp = (p) => localePathFor(locale, p);
+// The selector keeps the reader on the SAME page in the new language: strip
+// this locale's prefix from the current path, re-prefix with the target's.
+const _path = Astro.url.pathname.endsWith('/') || Astro.url.pathname.includes('#') ? Astro.url.pathname : Astro.url.pathname + '/';
+const _suffix = locale === 'en' ? _path : _path.replace(new RegExp(`^/${locale}(/|$)`), '/');
+const langHref = (l) => (l === 'en' ? _suffix : `/${l}${_suffix === '/' ? '/' : _suffix}`);
 ---
 <header class="nav" id="nav">
-  <div class="wrap nav__row">
-    <a class="nav__logo" href="/" aria-label="4/RL Co. home">
-      <img class="nav__mark" src="/4rl-mark.svg" alt="4/RL Co. logo" width="23" height="23" />
-      <span class="display">4<span class="slash">/</span>RL</span>
+  <div class="wrap nav__row surface--dark">
+    <a class="nav__chip nav__logo" href="/" aria-label="4/RL Co. home">
+      <img class="nav__wordmark" src="/4rl-wordmark.png" alt="" width="871" height="132" />
     </a>
 
-    <button class="nav__toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navPanel">
+    <button class="nav__chip nav__toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navPanel">
       <span></span><span></span>
     </button>
 
     <div class="nav__panel" id="navPanel">
       <nav class="nav__links mono" aria-label="Primary">
-        <a href="/#work">Work</a>
-        <a href="/#news">News</a>
-        <a href="/journal">Journal</a>
-        <a href="/#about">About</a>
-        <a href="/#contact">Contact</a>
+        <a href={`${h}#capabilities`}>{t.nav.capabilities}</a>
+        <div class="nav__item">
+          <a href={`${h}#work`} aria-haspopup="true">{t.nav.work}</a>
+          <div class="nav__sub" aria-label="Ventures">
+            {ventures.map((v) => (
+              <a class="nav__sub-link" href={lp(`/work/${v.slug}`)}>
+                <span class="nav__sub-name">{v.name}</span>
+                <span class="nav__sub-sector">{t.work.ventures[v.slug]?.sector ?? v.sector}</span>
+              </a>
+            ))}
+            <a class="nav__sub-link nav__sub-all" href={`${h}#work`}>{t.nav.allWork} <span class="arr">→</span></a>
+          </div>
+        </div>
+        <a href={`${h}#news`}>{t.nav.news}</a>
+        <a href={lp("/journal")}>{t.nav.journal}</a>
+        <a href={lp("/studio")}>{t.nav.studio}</a>
       </nav>
-      <a class="pill nav__cta" href="/#contact">Let's talk <span class="slash">/</span></a>
+
+      {/* On the panel the selector renders inline; the floating chip version
+          below is desktop-only. */}
+      <div class="nav__langs-m mono" aria-label="Language">
+        {LOCALES.map((l) => (
+          <a href={langHref(l)} aria-current={l === locale ? 'true' : undefined}>{LOCALE_META[l].code}</a>
+        ))}
+      </div>
+
+      {/* The language selector: same dropdown grammar as Work, one chip of
+          glass. A language is a URL, so every option is a plain link to that
+          locale's home — no JS, no cookie, nothing to hydrate. */}
+      <div class="nav__item nav__lang">
+        <a class="nav__chip nav__lang-chip mono" href={langHref(locale)} aria-haspopup="true" aria-label="Language">
+          {LOCALE_META[locale].code}
+        </a>
+        <div class="nav__sub nav__sub--right" aria-label="Languages">
+          {LOCALES.map((l) => (
+            <a class="nav__sub-link" href={langHref(l)} aria-current={l === locale ? 'true' : undefined}>
+              <span class="nav__sub-name">{LOCALE_META[l].name}</span>
+              <span class="nav__sub-sector">{LOCALE_META[l].code}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <a class="pill nav__cta" href={`${h}#contact`}>{t.nav.talk} <span class="slash">/</span></a>
     </div>
   </div>
 </header>
 
 <style>
-  .nav{
-    position:fixed; top:0; left:0; right:0; z-index:100;
-    backdrop-filter:blur(10px);
-    background:linear-gradient(180deg, rgba(10,10,11,.72), rgba(10,10,11,0));
+  .nav{ position:fixed; top:var(--nav-top); left:0; right:0; z-index:100; }
+  /* The nav aligns to the hero FRAME, not to the content grid: no max-width,
+     and the inline padding is the frame inset plus a small margin, so the
+     chips sit just inside the moldura's rounded corners at every viewport
+     width instead of hanging past the image. The wrap only positions the
+     pieces; it must not swallow pointer events across the full width. */
+  .nav > .wrap{
+    pointer-events:none; background:none;
+    max-width:none;
+    padding-inline:calc(var(--pad-sheet) + 14px);
   }
-  .nav__row{ display:flex; align-items:center; justify-content:space-between; gap:24px; padding-top:18px; padding-bottom:18px; }
-  .nav__logo{ display:inline-flex; align-items:center; gap:10px; font-size:24px; letter-spacing:-.04em; }
-  .nav__mark{ width:23px; height:23px; display:block; }
+  .nav__chip, .nav__links, .nav__cta, .nav__panel{ pointer-events:auto; }
 
-  .nav__panel{ display:flex; align-items:center; gap:clamp(20px,3vw,44px); }
-  .nav__links{ display:flex; gap:clamp(16px,2.4vw,40px); }
-  .nav__links a{ position:relative; color:var(--ink-muted); transition:color .25s var(--ease); }
-  .nav__links a:hover{ color:var(--ink); }
-  .nav__links a::after{ content:""; position:absolute; left:0; bottom:-6px; height:1px; width:0; background:var(--accent); transition:width .3s var(--ease); }
-  .nav__links a:hover::after{ width:100%; }
+  .nav__row{
+    position:relative;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:clamp(12px,2vw,24px);
+  }
+
+  /* the shared dark glass */
+  .nav__chip, .nav__links{
+    background:rgba(10,10,11,.72);
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:100px;
+    -webkit-backdrop-filter:blur(14px) saturate(1.25);
+    backdrop-filter:blur(14px) saturate(1.25);
+  }
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .nav__chip, .nav__links{ background:var(--near-black); }
+  }
+
+  .nav__chip{ display:inline-flex; align-items:center; padding:12px 20px; }
+  .nav__wordmark{ height:20px; width:auto; display:block; }
+
+  /* the link pill, dead-centre regardless of what the sides weigh */
+  .nav__links{
+    position:absolute; left:50%; transform:translateX(-50%);
+    display:flex; gap:clamp(4px,1vw,10px);
+    padding:6px;
+  }
+  .nav__links a{
+    color:var(--ink-muted); padding:8px 14px; border-radius:100px;
+    transition:color .25s var(--ease), background .25s var(--ease);
+  }
+  .nav__links a:hover{ color:var(--ink); background:rgba(255,255,255,.07); }
+
+  /* ---- the Work dropdown ---- */
+  .nav__item{ position:relative; display:inline-flex; }
+  .nav__sub{
+    position:absolute; top:calc(100% + 12px); left:50%; transform:translateX(-50%) translateY(-4px);
+    min-width:240px; padding:8px;
+    display:grid; gap:2px;
+    background:rgba(10,10,11,.88);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:var(--radius-lg);
+    -webkit-backdrop-filter:blur(18px) saturate(1.25);
+    backdrop-filter:blur(18px) saturate(1.25);
+    /* Visibility does double duty: it hides the menu AND kills its hit area
+       when hidden. No pointer-events toggling — that property doesn't
+       transition, so it would cut the bridge dead the instant the trigger
+       loses hover, while visibility honours the close delay below. */
+    opacity:0; visibility:hidden;
+    /* The close waits 220ms; the open doesn't (overridden below). The delay
+       is what forgives the diagonal from trigger to menu leaving the item
+       for a moment. */
+    transition:opacity .25s var(--ease), transform .25s var(--ease), visibility .25s var(--ease);
+    transition-delay:.22s;
+  }
+  /* The bridge: an invisible strip spanning the 12px gap between the trigger
+     and the menu. Without it the pointer falls off .nav__item crossing the
+     gap and the menu closes under the cursor. */
+  .nav__sub::before{
+    content:""; position:absolute; top:-14px; left:-8px; right:-8px; height:16px;
+  }
+  .nav__item:hover .nav__sub, .nav__item:focus-within .nav__sub{
+    opacity:1; visibility:visible;
+    transform:translateX(-50%) translateY(0);
+    transition-delay:0s;
+  }
+  .nav__sub-link{
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+    padding:10px 14px; border-radius:12px;
+  }
+  .nav__links .nav__sub-link{ border-radius:12px; }
+  .nav__sub-name{ color:var(--ink); }
+  .nav__sub-sector{ color:var(--ink-muted); font-size:10px; }
+  .nav__sub-all{ border-top:1px solid rgba(255,255,255,.1); border-radius:0 0 12px 12px; margin-top:4px; padding-top:12px; color:var(--ink-muted); }
+  .nav__sub-all .arr{ color:var(--accent); }
+
+  /* ---- language selector ---- */
+  /* desktop: the panel is the right-hand cluster, [lang chip][CTA] */
+  .nav__panel{ display:flex; align-items:center; gap:10px; }
+  .nav__lang-chip{
+    font-size:12px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink); padding:14px 16px;
+  }
+  .nav__sub--right{ left:auto; right:0; transform:translateY(-4px); }
+  .nav__item:hover .nav__sub--right, .nav__item:focus-within .nav__sub--right{ transform:translateY(0); }
+  .nav__sub-link[aria-current="true"] .nav__sub-name{ color:var(--accent); }
+  /* panel-inline languages: desktop hides them, the panel shows them */
+  .nav__langs-m{ display:none; }
+
+  /* On the panel the dropdown becomes an inline sub-list under Work: there is
+     no hover to hang a dropdown on, and a menu inside a menu is a trap. */
+  @media (max-width:860px){
+    .nav__item{ display:block; }
+    .nav__sub{
+      position:static; transform:none;
+      opacity:1; visibility:visible; pointer-events:auto;
+      background:none; border:0; border-radius:0; min-width:0; padding:2px 0 6px 18px; gap:0;
+      -webkit-backdrop-filter:none; backdrop-filter:none;
+    }
+    /* 44px-class tap targets on the panel: fingers, not cursors */
+    .nav__sub-link{ padding:10px 0; border-radius:0; justify-content:flex-start; }
+    .nav__sub-name{ font-family:var(--font-mono); font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-muted); }
+    .nav__sub-sector{ display:none; }
+    .nav__sub-all{ border-top:0; margin-top:0; padding-top:10px; font-size:14px; }
+  }
+
+  /* the one white object on the page */
+  .nav__cta{
+    background:#FFF; color:var(--paper-ink); border-color:#FFF;
+    padding:13px 20px;
+  }
+  .nav__cta:hover{ background:var(--paper-2); color:var(--paper-ink); border-color:var(--paper-2); }
+  .nav__cta .slash{ color:var(--paper-ink); }
 
   /* hamburger — hidden on desktop */
   .nav__toggle{
-    display:none; width:44px; height:44px; margin:-10px -8px -10px 0; padding:0;
-    background:none; border:0; cursor:pointer; position:relative; z-index:2;
+    display:none; width:46px; height:46px; padding:0;
+    cursor:pointer; position:relative; z-index:2;
   }
   .nav__toggle span{
-    position:absolute; left:11px; right:11px; height:2px; background:var(--ink);
+    position:absolute; left:14px; right:14px; height:2px; background:var(--ink);
     transition:transform .3s var(--ease), opacity .3s var(--ease);
   }
   .nav__toggle span:nth-child(1){ top:18px; }
   .nav__toggle span:nth-child(2){ bottom:18px; }
-  .nav.open .nav__toggle span:nth-child(1){ transform:translateY(5px) rotate(45deg); background:var(--accent); }
-  .nav.open .nav__toggle span:nth-child(2){ transform:translateY(-5px) rotate(-45deg); background:var(--accent); }
+  .nav.open .nav__toggle span:nth-child(1){ transform:translateY(4px) rotate(45deg); background:var(--accent); }
+  .nav.open .nav__toggle span:nth-child(2){ transform:translateY(-4px) rotate(-45deg); background:var(--accent); }
 
-  @media (max-width:760px){
+  @media (max-width:1080px){
+    .nav__links a{ padding:8px 10px; }
+  }
+
+  @media (max-width:860px){
     .nav__toggle{ display:block; }
+    .nav__chip.nav__logo{ padding:10px 16px; }
+    .nav__wordmark{ height:18px; }
     .nav__panel{
-      /* Explicit viewport sizing, not inset:0 — the parent .nav uses
-         backdrop-filter, which makes it the containing block for this
-         fixed child, so inset:0 would size the panel to the 60px bar
-         instead of the screen (menu overflows over the page). */
       position:fixed; top:0; left:0; width:100vw; height:100vh; height:100dvh; z-index:1;
-      flex-direction:column; align-items:flex-start; justify-content:center;
+      display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
       gap:8px; padding:0 var(--pad);
-      background:var(--bg);
+      background:var(--near-black);
       transform:translateY(-100%); opacity:0; visibility:hidden;
       transition:transform .4s var(--ease), opacity .3s var(--ease), visibility .4s var(--ease);
     }
     .nav.open .nav__panel{ transform:none; opacity:1; visibility:visible; }
-    .nav__links{ flex-direction:column; gap:6px; }
-    .nav__links a{ font-size:clamp(30px,9vw,52px); font-family:var(--font-display); font-weight:700; letter-spacing:-.03em; color:var(--ink); padding:8px 0; text-transform:none; }
-    .nav__links a::after{ display:none; }
+    /* inside the panel the links stop being a pill and become the menu */
+    .nav__links{
+      position:static; transform:none;
+      flex-direction:column; gap:4px; padding:0;
+      background:none; border:0;
+      -webkit-backdrop-filter:none; backdrop-filter:none;
+    }
+    .nav__links a{ font-size:clamp(28px,8vw,48px); font-family:var(--font-display); font-weight:700; letter-spacing:-.03em; color:var(--ink); padding:8px 0; text-transform:none; }
+    .nav__links a:hover{ background:none; }
     .nav__cta{ margin-top:22px; }
+    .nav__lang{ display:none; }
+    .nav__langs-m{
+      display:flex; gap:10px; margin-top:26px; flex-wrap:wrap;
+    }
+    .nav__langs-m a{ color:var(--ink-muted); letter-spacing:.1em; padding:10px 12px; margin:-4px 0; }
+    .nav__langs-m a[aria-current="true"]{ color:var(--accent); }
   }
 </style>
 

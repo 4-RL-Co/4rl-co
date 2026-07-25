@@ -1,63 +1,273 @@
 ---
-// Full-viewport R/GA-style hero: giant 4-line block + support text bottom-right
+// Hero: one image card, the Perplexity structure. The whole opening viewport
+// is a single rounded frame holding the cinematic still, with everything else
+// laid on top of it: kicker high, headline low-left, thesis in liquid glass
+// low-right, the ventures on the frame's bottom rule. The old type-then-band
+// split retired — the image stopped being a band under the hero and became
+// the hero's ground.
+//
+// The frame's still stays SHARP. The soft-blur rule is for plates working as
+// colour fields under marks; here the photograph is the argument, and the
+// concrete hall was chosen for exactly this frame: a quiet left field for the
+// type, the figure at the slit of light on the right.
+//
+// Voices in the headline: "better" is the serif, "AI" is the tech face (the
+// wordmark's own letterforms), "real" resolves to lime. One word per voice.
+//
+// Media resolution is unchanged: video beats still beats grade, all decided
+// at build time, all supported states. See public/media/README.md.
+import fs from 'node:fs';
+import path from 'node:path';
+import { Image } from 'astro:assets';
+import { ventures } from '../data/ventures.js';
+import { getLocale, getDict } from '../i18n/index.js';
+import { localePathFor } from '../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+const lp = (p) => localePathFor(locale, p);
+
+const MEDIA_DIR = path.resolve('public/media');
+const media = (f) => (fs.existsSync(path.join(MEDIA_DIR, f)) ? `/media/${f}` : null);
+
+const bandVideo = {
+  webm: media('hero-band.webm'),
+  mp4: media('hero-band.mp4'),
+  poster: media('hero-band-poster.jpg') ?? media('hero-band-poster.png'),
+};
+const hasVideo = Boolean(bandVideo.webm || bandVideo.mp4);
+
+const shots = import.meta.glob('../assets/hero/*.{jpg,jpeg,png,webp,avif}', { eager: true });
+const heroShot = Object.values(shots)[0]?.default ?? null;
 ---
-<section class="hero" id="top">
-  <div class="wrap hero__inner">
-    <p class="hero__kicker mono hero-in">Independent AI Venture Studio · São Paulo</p>
+<section class="hero surface surface--dark surface--deep" id="top">
+  <div class="hero__frame crop hero-in">
+    {hasVideo ? (
+      <video
+        class="hero__media"
+        id="heroBandVideo"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster={bandVideo.poster ?? undefined}
+        aria-hidden="true"
+      >
+        {bandVideo.webm && <source src={bandVideo.webm} type="video/webm" />}
+        {bandVideo.mp4 && <source src={bandVideo.mp4} type="video/mp4" />}
+      </video>
+    ) : heroShot ? (
+      <Image
+        class="hero__media"
+        src={heroShot}
+        alt=""
+        widths={[960, 1600, 2400]}
+        sizes="100vw"
+        format="webp"
+        quality={76}
+        loading="eager"
+        fetchpriority="high"
+        decoding="sync"
+      />
+    ) : null}
+    <div class="hero__scrim" aria-hidden="true"></div>
 
-    <h1 class="hero__title display hero-in" style="--hd:1">
-      We make the<br />
-      world better<br />
-      with <span class="hero__slash">/</span><span class="hl">AI</span>.<br />
-      For <span class="hl">real</span>.
-    </h1>
-
-    <div class="hero__support hero-in" style="--hd:2">
-      <p class="hero__thesis">
-        We start companies and run them, across influence, education,
-        applied AI and film.
+    <div class="wrap hero__content">
+      <p class="hero__kicker mono">
+        {t.hero.kicker}
+        <span class="hero__dot" aria-hidden="true">·</span>
+        {t.hero.city}
+        <span class="hero__coords coords" aria-hidden="true">23.5505° S / 46.6333° W</span>
       </p>
-      <a class="hero__link" href="#work">See the portfolio <span class="arr">↗</span></a>
+
+      {/* Lines come from the locale dictionary, voices included: the serif
+          word, the lime slash and the Michroma AI travel with each language.
+          "For real." left the hero on the owner's call — the signature lives
+          on in the wordmark, the contact close and the ticker. */}
+      <h1 class="hero__title display">
+        {t.hero.lines.map((line, i) => (
+          <span class="tline"><span class="tline__in" style={`--tl:${i}`} set:html={line} /></span>
+        ))}
+      </h1>
+
+      <div class="hero__lower">
+        <ul class="hero__facts" aria-label="The studio in three facts">
+          {t.hero.facts.map((f) => (<li class="pill hero__fact">{f}</li>))}
+        </ul>
+
+        {/* The thesis pane. The glass budget rose to two on the owner's
+            call: the signature line above carries the other. */}
+        <div class="glass hero__support">
+          <p class="hero__thesis">{t.hero.thesis}</p>
+          <a class="hero__link" href="#work">{t.hero.portfolio} <span class="arr">↗</span></a>
+        </div>
+      </div>
+
+      <div class="hero__rule">
+        <span class="caption">{t.hero.rule}</span>
+        <ul class="hero__ventures" aria-label="Ventures">
+          {ventures.map((v) => (
+            <li><a class="pill hero__venture" href={lp(`/work/${v.slug}`)}>{v.name}</a></li>
+          ))}
+        </ul>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .hero{ position:relative; }
-  .hero__inner{
-    min-height:100svh;
-    display:flex; flex-direction:column;
-    padding-top:clamp(92px, 11vh, 124px); padding-bottom:clamp(28px,5vh,56px);
+  .hero{ padding:var(--pad-sheet); }
+  .hero__frame{
+    position:relative; overflow:hidden;
+    border-radius:var(--radius-xl);
+    min-height:min(calc(100svh - var(--pad-sheet) * 2), 980px);
+    display:flex;
+    background:var(--grade-slate);
   }
-  .hero__kicker{ margin-bottom:clamp(18px,3vh,36px); }
+  /* :global is load-bearing here. <Image> is an Astro COMPONENT, and scoped
+     styles never reach inside a child component's markup — a plain scoped
+     .hero__media matches nothing, the img lands in normal flow at full
+     height, and the whole hero collapses into image-then-text. The class
+     still passes through to the rendered <img>, so a :global selector fenced
+     inside .hero__frame stays effectively private. */
+  .hero__frame :global(.hero__media){
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    /* A breath of blur, not the field treatment: enough to push the image one
+       step behind the type, little enough that the frame is still a shot.
+       The scale hides the fringe the blur pulls in from the edges. */
+    filter:blur(3px) saturate(1.05);
+    transform:scale(1.03);
+  }
+  /* Grain plus a scrim graded like a shot, not a veil: the LEFT is where the
+     type lives, so the left carries the weight and falls off before the
+     figure; top and bottom hold their edges. The photograph keeps its light
+     exactly where the composition wants the eye to end up. */
+  .hero__scrim{
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      var(--grain), var(--grain),
+      linear-gradient(90deg, rgba(10,10,11,.62), rgba(10,10,11,.28) 38%, transparent 62%),
+      linear-gradient(180deg, rgba(10,10,11,.45), transparent 32%),
+      linear-gradient(0deg, rgba(10,10,11,.72), transparent 58%);
+  }
 
+  .hero__content{
+    position:relative; z-index:1; width:100%;
+    display:flex; flex-direction:column;
+    padding-top:calc(var(--nav-h) + clamp(24px,4vh,48px));
+    padding-bottom:clamp(20px,3vh,36px);
+  }
+
+  .hero__kicker{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; color:rgba(242,242,243,.75); }
+  .hero__dot{ opacity:.5; }
+  .hero__coords{ margin-left:auto; opacity:.72; }
+
+  /* Weight 400 over the photograph: the wall came down twice, 700 to 500 and
+     500 to 400 on the owner's eye. The variable face carries it natively.
+     The size is capped by HEIGHT as well as width: four lines of 7.2vw alone
+     can outgrow a laptop viewport, and when the stack exceeds the frame the
+     auto margin collapses and everything crams. min() keeps the four lines
+     near 40svh, so kicker, chips, glass and the ventures rule always fit. */
   .hero__title{
+    margin-top:auto;
     text-transform:uppercase;
-    /* large and dominant, but not overwhelming */
-    font-size:clamp(32px, 9.5vw, 156px);
-    letter-spacing:-.05em; line-height:.93;
+    font-weight:400;
+    /* Sized for the LONG line: "world better with /AI." runs about 12.8em,
+       so 6.7vw keeps it inside the wrap at every width; three lines instead
+       of four buys the taller 11.5svh height cap. */
+    font-size:clamp(30px, min(6.7vw, 11.5svh), 118px);
+    letter-spacing:-.025em; line-height:.97;
+    /* Two shadows doing two jobs. The tight one buys edge contrast at the
+       glyph itself; the wide one is so large and so faint that it never
+       forms a boundary. One medium shadow did both badly: across dense
+       lines it merged into a visible dark rectangle behind the block. */
+    text-shadow:
+      0 1px 2px rgba(0,0,0,.35),
+      0 0 110px rgba(0,0,0,.3);
   }
   .hero__slash{ color:var(--accent); display:inline-block; animation:slashPulse 3.2s var(--ease) infinite; }
 
-  /* support text pinned bottom-right, R/GA style */
-  .hero__support{ margin-top:auto; align-self:flex-end; max-width:34ch; text-align:left; }
-  .hero__thesis{ color:var(--ink-muted); font-size:clamp(14px,1.35vw,18px); }
+
+  .hero__lower{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:clamp(20px,3vw,48px); flex-wrap:wrap;
+    /* generous on purpose: the headline breathes above the glass box instead
+       of resting on it */
+    margin-top:clamp(28px,5vh,64px);
+  }
+  /* The chips may shrink and wrap among themselves; the glass card may not.
+     Without this the row gives up and stacks, which is the cram the frame
+     cannot afford. */
+  .hero__facts{ list-style:none; display:flex; flex-wrap:wrap; gap:8px; flex:1 1 0; min-width:260px; }
+  .hero__support{ flex-shrink:0; }
+  .hero__fact{
+    color:var(--ink); cursor:default;
+    background:rgba(10,10,11,.34);
+    border-color:rgba(255,255,255,.2);
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  }
+  .hero__fact:hover{ border-color:rgba(255,255,255,.2); color:var(--ink); }
+
+  .hero__support{
+    max-width:36ch;
+    padding:clamp(16px,2vw,24px) clamp(18px,2.2vw,28px);
+  }
+  .hero__thesis{ color:var(--ink); font-size:clamp(14px,1.3vw,17px); }
   .hero__link{
-    display:inline-block; margin-top:16px; font-family:var(--font-mono);
-    font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink);
-    border-bottom:1px solid var(--line); padding-bottom:4px; transition:color .25s var(--ease), border-color .25s var(--ease);
+    display:inline-block; margin-top:12px; font-family:var(--font-mono);
+    font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink);
+    border-bottom:1px solid rgba(255,255,255,.4); padding-bottom:4px;
+    transition:border-color .25s var(--ease);
   }
-  .hero__link:hover{ color:var(--accent); border-color:var(--accent); }
+  .hero__link:hover{ border-color:var(--accent); }
 
-  @media (max-width:720px){
-    .hero__support{ align-self:flex-start; max-width:38ch; }
+  .hero__rule{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:clamp(14px,3vw,40px); flex-wrap:wrap;
+    margin-top:clamp(16px,2.6vh,32px); padding-top:14px;
+    border-top:1px solid rgba(255,255,255,.2);
+  }
+  .hero__rule .caption{ color:rgba(242,242,243,.72); }
+  .hero__ventures{ list-style:none; display:flex; flex-wrap:wrap; gap:8px; }
+  .hero__venture{
+    color:var(--ink);
+    background:rgba(10,10,11,.34);
+    border-color:rgba(255,255,255,.2);
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  }
+  .hero__venture:hover{ border-color:var(--accent); color:var(--accent); }
+
+  @media (max-width:860px){
+    .hero__coords{ display:none; }
+    .hero__support{ max-width:none; }
+    .hero__rule .caption{ width:100%; }
+  }
+  /* Short viewports: the chips are the first passengers off — their facts
+     live again on /studio and the capability pages, and a cramped frame
+     costs more than a missing row. */
+  @media (max-height:720px){
+    .hero__facts{ display:none; }
   }
 
-  /* ---- fast hero entrance (never blank; ends visible) ---- */
+  /* entrance: the frame rises as one object; the lines then rise inside it */
   @keyframes heroIn{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
-  .hero-in{ animation:heroIn .42s var(--ease) both; animation-delay:calc(var(--hd, 0) * .07s); }
+  .hero-in{ animation:heroIn .5s var(--ease) both; }
   @media (prefers-reduced-motion: reduce){
     .hero-in{ animation:none; }
     .hero__slash{ animation:none; }
   }
 </style>
+
+{hasVideo && (
+  <script>
+    /* Reduced motion cannot be honoured in CSS here: there is no property that
+       stops a video from playing. Pausing it leaves the poster on screen, which
+       is the still we wanted in that case anyway. */
+    const v = document.getElementById('heroBandVideo');
+    if (v && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      v.removeAttribute('autoplay');
+      v.pause();
+    }
+  </script>
+)}

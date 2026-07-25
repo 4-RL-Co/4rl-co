@@ -1,104 +1,115 @@
 ---
-// Capabilities — the studio's range as an intentional thesis: one studio applying
-// AI across the whole value chain, from business to creative. Sits between Hero and
-// Work. Reuses the shared primitives (.seclabel, .reveal, .slash, .hl) so it stays
-// 100% inside the design system; fade-up comes from the global IntersectionObserver
-// in Base.astro (content is visible by default, reduced motion respected).
-const pillars = [
-  {
-    idx: '01',
-    title: 'Operations & Growth',
-    line: 'Strategy, growth and commercial, powered by AI.',
-  },
-  {
-    idx: '02',
-    title: 'Data & Applied AI',
-    line: 'Turning data and AI into decisions that move the numbers.',
-  },
-  {
-    idx: '03',
-    title: 'Creative & Content',
-    line: 'AI-native creative, from concept to production.',
-  },
-];
+// Capabilities — the studio's range as an intentional thesis: one studio
+// applying AI across the whole value chain, from business to creative. Data
+// lives in capabilities.js, shared with /capabilities/<slug>, and each card
+// is a door to its page: the expertise argument gets room there instead of
+// cramming into a card line.
+import { capabilities as pillars } from '../data/capabilities.js';
+import { getLocale, getDict } from '../i18n/index.js';
+import { localePathFor } from '../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+const lp = (p) => localePathFor(locale, p);
 ---
-<section class="cap" id="capabilities" aria-labelledby="cap-title">
+<section class="cap surface surface--dark surface--deep" id="capabilities" aria-labelledby="cap-title">
   <div class="wrap">
-    <p class="cap__kicker seclabel reveal">Capabilities <span class="slash">/</span></p>
+    <p class="seclabel reveal"><span class="n">01</span> <span class="slash">/</span> {t.cap.label}</p>
 
-    <h2 class="cap__title display reveal" id="cap-title" data-d="1">
-      One studio, the full <span class="serif">value</span> chain<span class="slash">.</span>
-    </h2>
-    <p class="cap__sub reveal" data-d="2">From the back office to the brand.</p>
+    <div class="cap__head">
+      <h2 class="cap__title display reveal" id="cap-title" set:html={t.cap.title} />
+      <p class="cap__sub reveal" data-d="1">{t.cap.sub}</p>
+    </div>
 
-    <ul class="cap__grid">
+    {/* Cards with the index as a ghost numeral filling the corner — the BLXR
+        move. The number was already the section's argument (stages of one
+        chain); at this size it becomes the texture too. */}
+    <ol class="cap__list">
       {pillars.map((p, i) => (
-        <li class="cap__pillar reveal" data-d={String(i + 1)}>
-          <p class="cap__idx mono"><span class="slash" aria-hidden="true">/</span> {p.idx}</p>
-          <h3 class="cap__name">{p.title}</h3>
-          <p class="cap__line">{p.line}</p>
+        <li class="reveal" data-d={String(i + 1)}>
+          <a class="cap__card" href={lp(`/capabilities/${p.slug}`)}>
+            <span class="cap__ghost display" aria-hidden="true">{p.idx}</span>
+            <span class="pill cap__tag">{t.cap.cards[p.slug]?.tag ?? p.tag}</span>
+            <h3 class="cap__name">{t.cap.cards[p.slug]?.title ?? p.title}</h3>
+            <p class="cap__line">{t.cap.cards[p.slug]?.line ?? p.line}</p>
+            <span class="cap__go mono">{t.cap.more} <span class="arr">→</span></span>
+          </a>
         </li>
       ))}
-    </ul>
+    </ol>
   </div>
 </section>
 
 <style>
   .cap{
-    padding-top:clamp(80px,13vh,150px);
-    padding-bottom:clamp(56px,9vh,110px);
+    padding-top:clamp(64px,10vh,120px);
+    padding-bottom:clamp(64px,10vh,130px);
   }
 
-  /* Headline: giant, tight grotesque. Lime lands only on the keyword. */
+  .cap__head{
+    display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+    align-items:end; gap:clamp(24px,4vw,72px);
+  }
   .cap__title{
-    font-size:clamp(34px,7vw,104px);
+    font-size:clamp(34px,6.4vw,92px);
     letter-spacing:-.045em; line-height:.94;
     max-width:15ch;
   }
   .cap__sub{
-    margin-top:clamp(16px,2.4vh,28px);
     color:var(--ink-muted);
     font-size:clamp(14px,1.35vw,18px);
-    max-width:42ch;
+    max-width:34ch; padding-bottom:.5em;
   }
 
-  /* Three pillars — 3 columns on desktop, thin --line rules for grid structure. */
-  .cap__grid{
-    list-style:none;
-    margin-top:clamp(44px,7vh,92px);
+  .cap__list{
+    list-style:none; margin-top:clamp(44px,7vh,88px);
     display:grid; grid-template-columns:repeat(3,1fr);
-    border-top:1px solid var(--line);
+    gap:clamp(12px,1.6vw,24px);
   }
-  .cap__pillar{ padding:clamp(30px,3.4vw,48px) 0; }
-  .cap__pillar + .cap__pillar{
-    border-left:1px solid var(--line);
-    padding-left:clamp(24px,2.6vw,44px);
+  .cap__card{
+    position:relative; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    min-height:clamp(240px,26vw,360px); height:100%;
+    padding:clamp(20px,2.4vw,32px);
+    background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:var(--radius-lg);
+    transition:transform .45s var(--ease), border-color .45s var(--ease);
   }
+  .cap__go{ margin-top:14px; color:var(--ink-muted); transition:color .3s var(--ease); }
+  .cap__card:hover .cap__go{ color:var(--ink); }
+  .cap__card:hover{ transform:translateY(-4px); border-color:rgba(255,255,255,.18); }
 
-  .cap__idx{
-    display:flex; align-items:center; gap:10px;
-    margin-bottom:16px; color:var(--ink-muted);
+  /* The numeral, oversized and clipped by the card's own edge. Text, not a
+     drawing: it zooms, selects and scales with the face. */
+  .cap__ghost{
+    position:absolute; top:-.14em; right:-.04em;
+    font-family:var(--font-tech); font-weight:400;
+    font-size:clamp(100px,11.5vw,180px); line-height:1;
+    letter-spacing:0;
+    color:rgba(255,255,255,.05);
+    pointer-events:none; user-select:none;
   }
-  .cap__idx .slash{ color:var(--accent); }   /* the "/" motif, in lime */
+  .cap__card:hover .cap__ghost{ color:rgba(255,255,255,.08); transition:color .45s var(--ease); }
+
+  .cap__tag{ align-self:flex-start; margin-bottom:auto; white-space:nowrap; }
+  .cap__tag:hover{ border-color:var(--line); color:var(--ink); }
 
   .cap__name{
     font-family:var(--font-display); font-weight:700;
-    letter-spacing:-.02em; line-height:1;
-    font-size:clamp(21px,2vw,30px); text-transform:uppercase;
-    transition:color .3s var(--ease);
+    letter-spacing:-.03em; line-height:1;
+    font-size:clamp(22px,2.2vw,34px); text-transform:uppercase;
+    margin-top:clamp(28px,4vh,48px);
   }
-  .cap__pillar:hover .cap__name{ color:var(--accent); }   /* lime only on hover */
-
   .cap__line{
-    margin-top:14px; color:var(--ink-muted);
+    margin-top:10px; color:var(--ink-muted);
     font-size:clamp(13px,1.25vw,16px);
     max-width:34ch;
   }
 
-  /* Mobile: stack cleanly, no horizontal overflow. Rules become top borders. */
-  @media (max-width:760px){
-    .cap__grid{ grid-template-columns:1fr; border-top:0; }
-    .cap__pillar{ padding:clamp(22px,6vw,30px) 0; border-top:1px solid var(--line); }
-    .cap__pillar + .cap__pillar{ border-left:0; padding-left:0; }
+  @media (max-width:860px){
+    .cap__head{ grid-template-columns:1fr; align-items:start; }
+    .cap__sub{ padding-bottom:0; }
+    .cap__list{ grid-template-columns:1fr; }
+    .cap__card{ min-height:200px; }
   }
 </style>

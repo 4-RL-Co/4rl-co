@@ -11,6 +11,22 @@ export default defineConfig({
   site: SITE_URL,
   compressHTML: true,
   build: { inlineStylesheets: 'always' },
+  // A language is a URL: English (the canonical voice) at the root, four
+  // localized homes under their prefixes. Components self-localize from
+  // Astro.currentLocale; dictionaries live in src/i18n/.
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'pt', 'es', 'zh', 'ru'],
+    routing: { prefixDefaultLocale: false },
+  },
+  // The project lives under "01. 4:RL Co." — spaces and a colon in the path.
+  // Vite's dev-server allow-list matching cannot cope with it: every asset
+  // under src/ and node_modules (the photos through /_image, the Fontsource
+  // woffs) came back 500 "outside of Vite serving allow list", even with the
+  // exact project root pinned in fs.allow. strict:false is the documented
+  // escape hatch and it is DEV ONLY: the flag configures the local dev server
+  // and never touches the production build, which was never affected.
+  vite: { server: { fs: { strict: false } } },
   integrations: [
     // Answer Engine Optimization: generates machine-readable files for AI
     // crawlers (ChatGPT, Claude, Perplexity, Google AI Overviews) at build time.

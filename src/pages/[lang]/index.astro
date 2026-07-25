@@ -1,0 +1,37 @@
+---
+// The localized homes: /pt/ /es/ /zh/ /ru/. Same components as the root page,
+// zero duplication — every component reads Astro.currentLocale and pulls its
+// strings from src/i18n/. The deep pages they link to remain English in this
+// phase (see the scope note in src/i18n/index.js).
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Hero from '../../components/Hero.astro';
+import Capabilities from '../../components/Capabilities.astro';
+import Work from '../../components/Work.astro';
+import Ticker from '../../components/Ticker.astro';
+import OpenSource from '../../components/OpenSource.astro';
+import Manifesto from '../../components/Manifesto.astro';
+import Bento from '../../components/Bento.astro';
+import Footer from '../../components/Footer.astro';
+import { getDict } from '../../i18n/index.js';
+
+export function getStaticPaths() {
+  return ['pt', 'es', 'zh', 'ru'].map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const t = getDict(lang);
+---
+<Base title={t.meta.title} description={t.meta.desc} twitterDesc={t.meta.twitter}>
+  <Nav />
+  <main>
+    <Hero />
+    <Capabilities />
+    <Work />
+    <Ticker />
+    <OpenSource />
+    <Manifesto />
+    <Bento />
+    <Footer />
+  </main>
+</Base>

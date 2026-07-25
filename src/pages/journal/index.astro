@@ -2,6 +2,14 @@
 import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import { articles } from '../../data/journal.js';
+import { getLocale } from '../../i18n/index.js';
+import { getPages, localePathFor } from '../../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const P = getPages(locale);
+const C = P.chrome;
+const lp = (p) => localePathFor(locale, p);
+const jp = (a) => P.journalPosts[a.slug] ?? {};
 
 const site = 'https://www.4real.ventures';
 // CollectionPage schema — models the journal index as a content page listing posts.
@@ -23,7 +31,7 @@ const collectionSchema = {
   })),
 };
 ---
-<Base title="Journal · 4/RL Co." description="Writing from 4/RL Co.: notes and ideas on building AI ventures." jsonLd={collectionSchema}>
+<Base title={C.journalTitle} description={C.journalDesc} jsonLd={collectionSchema}>
   <Nav />
   <main class="jrn">
     <div class="wrap">
@@ -37,21 +45,21 @@ const collectionSchema = {
         </div>
       ) : (
         <>
-          <h1 class="jrn__h display reveal" data-d="1">Thinking <span class="slash">/</span> in <span class="serif">public</span>.</h1>
+          <h1 class="jrn__h display reveal" data-d="1" set:html={C.journalH} />
           <ul class="jrn__list">
             {articles.map((a) => (
               <li class="reveal">
-                <a class="jrn__card" href={`/journal/${a.slug}`}>
-                  <span class={'jrn__cover' + (a.cover ? '' : ' is-fallback')}>
+                <a class="jrn__card" href={lp(`/journal/${a.slug}`)}>
+                  <span class={'jrn__cover' + (a.cover ? '' : ' is-fallback')} style={a.coverIcon ? `--cover-icon:url('${a.coverIcon}')` : undefined}>
                     {a.cover
                       ? <img src={a.cover} alt={`Cover image for “${a.title}”`} loading="lazy" />
                       : <span class="jrn__cover-title display">{a.title}</span>}
                   </span>
                   <span class="jrn__meta">
                     <span class="jrn__date mono">{a.date}</span>
-                    <span class="jrn__title display">{a.title}</span>
-                    <span class="jrn__ex">{a.excerpt}</span>
-                    <span class="jrn__go mono">Read <span class="arr">↗</span></span>
+                    <span class="jrn__title display">{jp(a).title ?? a.title}</span>
+                    <span class="jrn__ex">{jp(a).excerpt ?? a.excerpt}</span>
+                    <span class="jrn__go mono">{C.read} <span class="arr">↗</span></span>
                   </span>
                 </a>
               </li>
@@ -74,15 +82,28 @@ const collectionSchema = {
   /* article list with cover */
   .jrn__list{ list-style:none; margin-top:clamp(40px,6vw,80px); display:grid; gap:clamp(28px,4vw,56px); }
   .jrn__card{ display:grid; grid-template-columns:minmax(240px,38%) 1fr; gap:clamp(20px,3vw,44px); align-items:center; }
+  /* Covers speak the home's plate language: softened photograph, grain, the
+     mark centered as the graphic element. */
   .jrn__cover{
-    aspect-ratio:16/9; border-radius:12px; overflow:hidden; border:1px solid var(--line);
+    position:relative;
+    aspect-ratio:16/9; border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--line);
     background:var(--bg-elev);
   }
-  .jrn__cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .jrn__cover img{ width:100%; height:100%; object-fit:cover; display:block; filter:blur(8px) saturate(1.05); transform:scale(1.06); }
+  .jrn__cover::before{
+    content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:var(--grain), var(--grain), linear-gradient(180deg, transparent 45%, rgba(0,0,0,.4) 100%);
+  }
+  .jrn__cover::after{
+    content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:var(--cover-icon, none) center / 44px 44px no-repeat;
+    filter:drop-shadow(0 4px 18px rgba(0,0,0,.55));
+  }
+  .jrn__cover.is-fallback::after, .jrn__cover.is-fallback::before{ content:none; }
   /* dark-card fallback only when there is no cover image */
   .jrn__cover.is-fallback{
     display:flex; align-items:flex-end; padding:18px;
-    background:radial-gradient(120% 100% at 80% 15%, rgba(198,255,58,.12), transparent 60%), var(--bg-elev);
+    background:radial-gradient(120% 100% at 80% 15%, var(--tint-2), transparent 60%), var(--bg-elev);
   }
   .jrn__cover.is-fallback .jrn__cover-title{ font-size:clamp(20px,2.4vw,32px); letter-spacing:-.03em; color:var(--ink); }
   .jrn__title{ font-size:clamp(24px,3vw,44px); letter-spacing:-.03em; transition:color .3s var(--ease); }

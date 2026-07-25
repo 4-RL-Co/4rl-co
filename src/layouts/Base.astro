@@ -1,12 +1,17 @@
 ---
 import '../styles/global.css';
 import Analytics from '@vercel/analytics/astro';
+import { getLocale, LOCALES, LOCALE_META, homePath } from '../i18n/index.js';
 
 const {
   title = '4/RL Co. · Independent AI Venture Studio',
   description = 'We improve the world with AI. For real. An independent AI venture studio building and operating ventures across influence, science, applied AI and cinema.',
   twitterDesc = 'We improve the world with AI. For real.',
   jsonLd,
+  // Colour of the browser chrome on mobile. It has to match whatever surface
+  // the page actually STARTS on, or the bar and the top of the page disagree:
+  // the home page opens on paper, every other page still opens on near-black.
+  themeColor = '#0A0A0B',
 } = Astro.props;
 // SITE_URL — the canonical 4/RL domain (used for absolute OG/Twitter image URLs).
 const site = 'https://www.4real.ventures';
@@ -16,6 +21,14 @@ const cfToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
 const clarityId = import.meta.env.PUBLIC_CLARITY_ID;
 
 const isHome = Astro.url.pathname === '/';
+// The locale rides the route (Astro i18n); non-localized pages are English.
+const locale = getLocale(Astro);
+// Every route exists in every locale now, so every page carries the full
+// alternate family. Strip the locale prefix to find the shared suffix.
+const normalized = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : Astro.url.pathname + '/';
+const prefix = LOCALES.find((l) => l !== 'en' && normalized.startsWith(`/${l}/`));
+const suffix = prefix ? normalized.slice(prefix.length + 1) : normalized;
+const altPath = (l) => (l === 'en' ? suffix : `/${l}${suffix}`);
 // Per-page canonical / OG url (was hardcoded to the homepage on every page).
 const canonicalURL = site + Astro.url.pathname;
 // Brand social profiles — used for schema.org sameAs (entity linking).
@@ -80,7 +93,7 @@ const webpageNode = {
 const homeSchemas = [orgNode, websiteNode, webpageNode];
 ---
 <!doctype html>
-<html lang="en">
+<html lang={locale === 'zh' ? 'zh-CN' : locale}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -91,7 +104,7 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
   {import.meta.env.PROD && (
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data: https://*.clarity.ms; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.clarity.ms https://*.clarity.ms; connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data: https://*.clarity.ms; media-src 'self'; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.clarity.ms https://*.clarity.ms; connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"
     />
   )}
   {/* Microsoft Clarity — loads early; project id comes from env, never hardcoded. */}
@@ -108,7 +121,7 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
   </script>
   <title>{title}</title>
   <meta name="description" content={description} />
-  <meta name="theme-color" content="#0A0A0B" />
+  <meta name="theme-color" content={themeColor} />
   <link rel="canonical" href={canonicalURL} />
   <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
   <link rel="dns-prefetch" href="https://www.clarity.ms" />
@@ -120,7 +133,15 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
   <link rel="apple-touch-icon" sizes="180x180" href={site + '/apple-touch-icon-180.png'} />
   <link rel="manifest" href="/site.webmanifest" />
 
+  {/* the language family: every home points at every home, English is the
+      x-default because English is the site's canonical voice */}
+  {LOCALES.map((l) => (
+    <link rel="alternate" hreflang={l === 'zh' ? 'zh-CN' : l} href={site + altPath(l)} />
+  ))}
+  <link rel="alternate" hreflang="x-default" href={site + suffix} />
+
   <meta property="og:type" content="website" />
+  <meta property="og:locale" content={LOCALE_META[locale].og} />
   <meta property="og:site_name" content="4/RL Co." />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
@@ -229,9 +250,22 @@ const homeSchemas = [orgNode, websiteNode, webpageNode];
         d.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
         c.style.opacity = '1'; d.style.opacity = '1';
       }, { passive: true });
+      /* The ring is a difference blend tuned for near-black. Over paper that
+         same blend turns the lime border violet, so the cursor has to know
+         which surface it is currently over. Hit-testing is the only reliable
+         answer (sections interleave and the ring is fixed-position), but
+         elementFromPoint forces layout, so it runs on every 6th frame of the
+         loop that is already running rather than on every pointermove. */
+      let onLight = false, tick = 0;
+      const syncSurface = () => {
+        const el = document.elementFromPoint(cx, cy);
+        const light = !!(el && el.closest && el.closest('.surface--light'));
+        if (light !== onLight) { onLight = light; root.classList.toggle('cursor-light', light); }
+      };
       (function loop() {
         dx += (cx - dx) * 0.18; dy += (cy - dy) * 0.18;
         c.style.transform = `translate(${dx}px,${dy}px) translate(-50%,-50%)`;
+        if ((tick = (tick + 1) % 6) === 0) syncSurface();
         requestAnimationFrame(loop);
       })();
       const hover = (on) => () => c.classList.toggle('is-hover', on);

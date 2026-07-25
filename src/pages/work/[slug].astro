@@ -1,0 +1,324 @@
+---
+// One page per venture: /work/<slug>. This is where the Work tiles point now,
+// and the external site link lives here, at the end of the story, which also
+// dissolves the nested-anchor problem the tiles had when they linked straight
+// out. Content comes from ventures.js (content as data, like everything else).
+//
+// All dark, like everything now: deep ground, the venture's grade as the
+// band, graphite where something needs to float.
+import fs from 'node:fs';
+import path from 'node:path';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { ventures } from '../../data/ventures.js';
+import { getLocale, homePath } from '../../i18n/index.js';
+import { getPages, localePathFor } from '../../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const P = getPages(locale);
+const C = P.chrome;
+const lp = (p) => localePathFor(locale, p);
+
+export function getStaticPaths() {
+  return ventures.map((v) => ({ params: { slug: v.slug }, props: { venture: v } }));
+}
+
+const { venture: v } = Astro.props;
+const site = 'https://www.4real.ventures';
+// locale content over the EN source, field by field
+const cs = { ...v.caseStudy, ...(P.caseStudies[v.slug] ?? {}) };
+
+// Same contracts as Work.astro: wordmark from public/ventures (aspect read at
+// build), still from src/assets/ventures named by `photo`. Absent is styled.
+const MARK_DIR = path.resolve('public/ventures');
+function aspectOf(full) {
+  if (/\.svg$/i.test(full)) {
+    const vb = fs
+      .readFileSync(full, 'utf8')
+      .match(/viewBox\s*=\s*["']\s*[\d.-]+[ ,]+[\d.-]+[ ,]+([\d.]+)[ ,]+([\d.]+)/i);
+    if (!vb) return null;
+    const w = parseFloat(vb[1]);
+    const h = parseFloat(vb[2]);
+    return w > 0 && h > 0 ? +(w / h).toFixed(4) : null;
+  }
+  const buf = fs.readFileSync(full);
+  const isPng = buf.length > 24 && buf.toString('ascii', 12, 16) === 'IHDR';
+  if (!isPng) return null;
+  const w = buf.readUInt32BE(16);
+  const h = buf.readUInt32BE(20);
+  return w > 0 && h > 0 ? +(w / h).toFixed(4) : null;
+}
+let markData = null;
+if (v.mark) {
+  const full = path.join(MARK_DIR, v.mark);
+  if (fs.existsSync(full)) {
+    try {
+      markData = { src: `/ventures/${v.mark}`, ar: aspectOf(full) };
+    } catch {
+      markData = null;
+    }
+  }
+}
+
+const shots = import.meta.glob('../../assets/ventures/*.{jpg,jpeg,png,webp,avif}', { eager: true });
+const shot = v.photo ? (shots[`../../assets/ventures/${v.photo}`]?.default ?? null) : null;
+
+// next venture, for the closing hand-off (wraps around)
+const i = ventures.findIndex((x) => x.slug === v.slug);
+const next = ventures[(i + 1) % ventures.length];
+
+const title = `${v.name} · 4/RL Co.`;
+const description = cs.lede;
+
+// Organization node for the venture itself, tied to the studio via
+// parentOrganization; plus the page and the trail that leads to it.
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${site}/work/${v.slug}/#organization`,
+    name: v.name,
+    url: v.href,
+    description: cs.lede,
+    parentOrganization: { '@id': `${site}/#organization` },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${site}/work/${v.slug}/#webpage`,
+    url: `${site}/work/${v.slug}/`,
+    name: title,
+    description,
+    isPartOf: { '@id': `${site}/#website` },
+    about: { '@id': `${site}/work/${v.slug}/#organization` },
+    inLanguage: locale,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Work', item: `${site}/#work` },
+      { '@type': 'ListItem', position: 2, name: v.name, item: `${site}/work/${v.slug}/` },
+    ],
+  },
+];
+---
+<Base title={title} description={description} twitterDesc={v.line} jsonLd={jsonLd}>
+  <Nav />
+  <main class="case">
+    <header class="surface surface--dark surface--deep case__head">
+      <div class="wrap">
+        <p class="case__crumb mono reveal">
+          <a href={`${homePath(locale)}#work`}>{C.workCrumb}</a> <span class="slash">/</span> {v.idx} <span class="slash">/</span> {P.caseStudies[v.slug]?.sector ?? v.sector}
+        </p>
+        <h1 class="case__title display">
+          <span class="tline"><span class="tline__in" style="--tl:0">{v.name}</span></span>
+        </h1>
+        <p class="case__lede reveal" data-d="1">{cs.lede}</p>
+      </div>
+    </header>
+
+    <div class="case__band">
+      <div class="plate plate--soft crop case__plate" style={`--grade:var(--grade-${v.grade});`}>
+        {shot && (
+          <Image
+            src={shot}
+            alt=""
+            widths={[960, 1600, 2400]}
+            sizes="100vw"
+            format="webp"
+            quality={72}
+            loading="eager"
+            fetchpriority="high"
+            decoding="sync"
+          />
+        )}
+        <div class="plate__body case__plate-body">
+          <div class="wrap">
+            {markData ? (
+              <span class="case__mark" style={`--s:${v.scale ?? 1};${markData.ar ? ` --ar:${markData.ar};` : ''}`}>
+                <img src={markData.src} alt="" width={markData.ar ? Math.round(72 * markData.ar) : undefined} height={markData.ar ? 72 : undefined} />
+              </span>
+            ) : (
+              <span class="case__markname display">{v.name}</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="surface surface--dark surface--deep case__body">
+      <div class="wrap case__grid">
+        <div class="case__story">
+          {cs.story.map((p, n) => (
+            <p class="reveal" data-d={String(n + 1)}>{p}</p>
+          ))}
+          {v.fact && <p class="case__fact mono reveal" data-d="3">{v.fact}</p>}
+          <a class="pill pill--solid case__visit reveal" data-d="3" href={v.href} target="_blank" rel="noopener">
+            {C.visit} {v.linkLabel} <span class="arr">↗</span>
+          </a>
+        </div>
+
+        <aside class="case__aside">
+          {cs.proof && (
+            <>
+              <p class="caption case__aside-label reveal">{C.onRecord}</p>
+              <ul class="case__proof">
+                {cs.proof.map((item, n) => (
+                  <li class="reveal" data-d={String((n % 3) + 1)}>
+                    <span class="slash" aria-hidden="true">/</span> {item}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {cs.partners && (
+            <>
+              <p class="caption case__aside-label case__aside-gap reveal">{C.builtWith}</p>
+              <ul class="case__partners">
+                {cs.partners.map((p, n) => (
+                  <li class="reveal" data-d={String(n + 1)}>
+                    <a href={p.href} target="_blank" rel="noopener">
+                      <span class="case__partner-name">{p.name} <span class="arr">↗</span></span>
+                      <span class="case__partner-role">{p.role}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          <p class="caption case__aside-label case__aside-gap reveal">{C.whatRuns}</p>
+          <ul class="case__does">
+            {cs.does.map((d, n) => (
+              <li class="reveal" data-d={String(n + 1)}>
+                <span class="case__does-k mono">{d.k}</span>
+                <span class="case__does-line">{d.line}</span>
+              </li>
+            ))}
+          </ul>
+          <dl class="case__specs reveal" data-d="3">
+            <div><dt class="caption">{C.model}</dt><dd>{C.modelValue}</dd></div>
+            <div><dt class="caption">{C.sector}</dt><dd>{P.caseStudies[v.slug]?.sector ?? v.sector}</dd></div>
+            <div><dt class="caption">{C.base}</dt><dd>{C.baseValue}</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <section class="surface surface--dark surface--deep case__close">
+      <div class="wrap case__close-row">
+        <a class="case__next display reveal" href={lp(`/work/${next.slug}`)}>
+          <span class="caption case__next-label">{C.nextVenture}</span>
+          {next.name} <span class="arr">→</span>
+        </a>
+        <div class="case__close-cta reveal" data-d="1">
+          <p class="case__close-line">{C.wantThis}</p>
+          <a class="pill pill--solid" href={`${homePath(locale)}#contact`}>{C.talk} <span class="slash">/</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .case__head{ padding-top:calc(var(--nav-h) + clamp(40px,8vh,90px)); padding-bottom:clamp(32px,5vh,56px); }
+  .case__crumb{ margin-bottom:clamp(20px,3vh,36px); }
+  .case__crumb a{ color:var(--ink-muted); transition:color .25s var(--ease); }
+  .case__crumb a:hover{ color:var(--ink); }
+  .case__title{
+    text-transform:uppercase;
+    font-size:clamp(44px,10vw,160px); letter-spacing:-.05em; line-height:.92;
+  }
+  .case__lede{
+    margin-top:clamp(18px,3vh,32px);
+    color:var(--ink-muted); font-size:clamp(16px,1.7vw,22px); max-width:52ch;
+  }
+
+  /* The band: the venture's stop of the grade, full bleed, wordmark centered.
+     Same discipline as everywhere else, the box is sized by CSS so the photo
+     lands into reserved space. */
+  .case__band{ background:var(--near-black); padding:0 var(--pad-sheet); }
+  .case__plate{
+    --plate-ar:auto; height:clamp(220px, 38svh, 480px);
+    border-radius:var(--radius-xl);
+  }
+  .case__plate-body{
+    position:absolute; inset:0; display:grid; align-items:center;
+  }
+  .case__mark{
+    --mark-h:calc(clamp(40px,5.4vw,84px) * var(--s, 1));
+    display:block; width:max-content; margin:0 auto;
+  }
+  .case__mark img{
+    display:block; height:var(--mark-h); width:auto;
+    aspect-ratio:var(--ar, auto);
+    filter:brightness(.92);
+  }
+  .case__markname{
+    display:block; text-align:center; text-transform:uppercase;
+    font-size:clamp(34px,5vw,80px); letter-spacing:-.04em;
+  }
+
+  .case__body{ padding-top:clamp(56px,9vh,110px); padding-bottom:clamp(64px,10vh,130px); }
+  .case__grid{
+    display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+    gap:clamp(32px,6vw,110px); align-items:start;
+  }
+  .case__story p{
+    color:var(--ink); font-size:clamp(16px,1.6vw,21px); line-height:1.6;
+    max-width:58ch;
+  }
+  .case__story p + p{ margin-top:1.2em; }
+  .case__fact{ margin-top:clamp(24px,4vh,40px); color:var(--ink); font-size:1.1em; }
+  .case__visit{ margin-top:clamp(28px,4vh,44px); }
+
+  .case__aside-label{ padding-bottom:14px; border-bottom:1px solid var(--line); }
+  .case__aside-gap{ margin-top:clamp(26px,3.6vh,40px); }
+
+  .case__proof{ list-style:none; }
+  .case__proof li{
+    padding:clamp(11px,1.5vh,15px) 0; border-bottom:1px solid var(--line);
+    color:var(--ink-muted); font-size:clamp(13px,1.3vw,15px); line-height:1.45;
+  }
+
+  .case__partners{ list-style:none; }
+  .case__partners a{
+    display:grid; gap:3px; padding:clamp(12px,1.6vh,16px) 0;
+    border-bottom:1px solid var(--line);
+  }
+  .case__partner-name{ color:var(--ink); }
+  .case__partner-name .arr{ color:var(--accent); font-size:.85em; }
+  .case__partner-role{ color:var(--ink-muted); font-size:clamp(12px,1.2vw,14px); }
+  .case__partners a:hover .case__partner-name{ color:var(--accent); }
+  .case__does{ list-style:none; }
+  .case__does li{
+    display:grid; gap:6px;
+    padding:clamp(16px,2vh,22px) 0; border-bottom:1px solid var(--line);
+  }
+  .case__does-k{ color:var(--ink); }
+  .case__does-line{ color:var(--ink-muted); font-size:clamp(13px,1.3vw,15px); }
+
+  .case__specs{ margin-top:clamp(22px,3vh,32px); display:grid; gap:14px; }
+  .case__specs div{ display:grid; gap:4px; }
+  .case__specs dd{ color:var(--ink); font-size:clamp(13px,1.3vw,15px); }
+
+  .case__close{ padding:clamp(56px,9vh,100px) 0; }
+  .case__close-row{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:clamp(24px,4vw,64px); flex-wrap:wrap;
+  }
+  .case__next{
+    text-transform:uppercase; font-size:clamp(28px,4.6vw,64px);
+    letter-spacing:-.04em; line-height:1; transition:color .3s var(--ease);
+  }
+  .case__next:hover{ color:var(--accent); }
+  .case__next-label{ display:block; margin-bottom:12px; }
+  .case__close-line{ color:var(--ink-muted); margin-bottom:14px; font-size:clamp(14px,1.4vw,17px); }
+
+  @media (max-width:860px){
+    .case__grid{ grid-template-columns:1fr; }
+  }
+</style>

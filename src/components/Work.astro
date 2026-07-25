@@ -1,11 +1,18 @@
 ---
 import fs from 'node:fs';
 import path from 'node:path';
+import { Image } from 'astro:assets';
 import { ventures } from '../data/ventures.js';
+import { getLocale, getDict } from '../i18n/index.js';
+import { localePathFor } from '../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+const lp = (p) => localePathFor(locale, p);
 
 // Wordmarks are resolved at BUILD time, never at runtime: a missing file falls
 // back to the grotesque name, so the page can never ship a broken image.
-// We also read the viewBox to get each mark's aspect ratio, which lets the row
+// We also read the viewBox to get each mark's aspect ratio, which lets the tile
 // reserve the right width up front (no reflow when the SVG lands).
 const MARK_DIR = path.resolve('public/ventures');
 
@@ -42,36 +49,78 @@ function readMark(file) {
   return { src: `/ventures/${file}`, ar };
 }
 
-const rows = ventures.map((v) => ({ ...v, markData: readMark(v.mark) }));
+// Cinematic stills, when they exist. Same contract as the wordmarks: named in
+// the data, resolved at build time, and absent is a supported state rather than
+// a broken one. src/assets/ventures/ is empty today and the tiles are finished
+// without it — the grade alone is the film.
+const shots = import.meta.glob('../assets/ventures/*.{jpg,jpeg,png,webp,avif}', { eager: true });
+const shotFor = (file) =>
+  file ? (shots[`../assets/ventures/${file}`]?.default ?? null) : null;
+
+// The bento is three tiles, and their spans and ratios are paired so the two in
+// the top row finish at the same height at every width: at 12 columns a 7-span
+// is 1.41x a 5-span, and 16/9 is 1.42x 5/4. The third runs the full width in
+// 21:9, which is the shape of the hero band, so the section closes on the same
+// frame it opened with.
+const layout = ['a', 'b', 'c'];
+
+const rows = ventures.map((v, i) => ({
+  ...v,
+  markData: readMark(v.mark),
+  shot: shotFor(v.photo),
+  span: layout[i] ?? 'c',
+}));
 const missing = rows.filter((r) => r.mark && !r.markData).map((r) => r.mark);
 if (missing.length) {
   console.warn(`[work] wordmark(s) missing, falling back to type: ${missing.join(', ')}`);
 }
 ---
-<section class="work" id="work">
+<section class="work surface surface--dark surface--deep" id="work">
   <div class="wrap">
-    <p class="seclabel reveal"><span class="n">01</span> <span class="slash">/</span> Work · Companies</p>
+    <p class="seclabel reveal"><span class="n">02</span> <span class="slash">/</span> {t.work.label}</p>
 
-    <ul class="work__list">
-      {rows.map((v) => (
-        <li class="reveal">
-          <a class="work__row row" href={v.href} target="_blank" rel="noopener">
-            <span class="work__idx mono">{v.idx}</span>
-            <span class="work__main">
-              {v.markData ? (
-                <span
-                  class="work__mark"
-                  style={`--s:${v.scale ?? 1};${v.markData.ar ? ` --ar:${v.markData.ar};` : ''}`}
-                >
-                  <img src={v.markData.src} alt={v.name} loading="lazy" decoding="async" />
-                </span>
-              ) : (
-                <span class="work__name display">{v.name}</span>
+    <ul class="work__grid">
+      {rows.map((v, i) => (
+        <li class={`work__cell work__cell--${v.span} reveal`} data-d={String(i + 1)}>
+          {/* Internal now: each tile opens the venture's case page, and the
+              external site link lives there at the end of the story. The
+              arrow follows: → says elsewhere on this site, ↗ says off it. */}
+          <a class="work__tile" href={lp(`/work/${v.slug}`)}>
+            <span class="plate plate--soft crop work__plate" style={`--grade:var(--grade-${v.grade});`}>
+              {v.shot && (
+                <Image
+                  src={v.shot}
+                  alt=""
+                  widths={[640, 1080, 1600]}
+                  sizes="(max-width: 860px) 100vw, 60vw"
+                  format="webp"
+                  quality={72}
+                  loading="lazy"
+                  decoding="async"
+                />
               )}
-              <span class="work__line">{v.line}</span>
+              <span class="plate__body work__body">
+                {v.markData ? (
+                  <span
+                    class="work__mark"
+                    style={`--s:${v.scale ?? 1};${v.markData.ar ? ` --ar:${v.markData.ar};` : ''}`}
+                  >
+                    <img src={v.markData.src} alt={v.name} loading="lazy" decoding="async" />
+                  </span>
+                ) : (
+                  <span class="work__name display">{v.name}</span>
+                )}
+              </span>
             </span>
-            <span class="work__sector mono">{v.sector}</span>
-            <span class="work__arr arr" aria-hidden="true">↗</span>
+
+            <span class="work__meta">
+              <span class="work__tag mono">
+                {v.idx} <span class="slash" aria-hidden="true">/</span> {t.work.ventures[v.slug]?.sector ?? v.sector}
+              </span>
+              <span class="work__line">{t.work.ventures[v.slug]?.line ?? v.line}</span>
+              {(t.work.ventures[v.slug]?.fact ?? v.fact) && <span class="work__fact mono">{t.work.ventures[v.slug]?.fact ?? v.fact}</span>}
+              <span class="work__arr arr" aria-hidden="true">→</span>
+            </span>
           </a>
         </li>
       ))}
@@ -80,63 +129,89 @@ if (missing.length) {
 </section>
 
 <style>
-  .work{ padding-top:clamp(72px,10vh,130px); padding-bottom:clamp(48px,7vh,90px); }
-  .work__list{ list-style:none; }
-  .work__row{
-    display:grid; grid-template-columns:auto 1fr auto auto;
-    align-items:center; gap:clamp(16px,3vw,48px);
-    padding:clamp(20px,3vw,38px) 0; border-top:1px solid var(--line);
-    transition:padding-left .4s var(--ease);
-  }
-  .work__list li:last-child .work__row{ border-bottom:1px solid var(--line); }
-  .work__row:hover{ padding-left:clamp(8px,1.4vw,22px); }
+  .work{ padding-top:clamp(64px,9vh,110px); padding-bottom:clamp(72px,11vh,140px); }
 
-  .work__idx{ color:var(--ink-muted); align-self:start; padding-top:.7em; }
-  .work__name{
-    font-size:clamp(32px,6vw,96px); letter-spacing:-.04em; line-height:.94;
-    text-transform:uppercase; transition:color .3s var(--ease);
+  .work__grid{
+    list-style:none;
+    display:grid; grid-template-columns:repeat(12,1fr);
+    gap:clamp(12px,1.6vw,26px);
+    align-items:start;
   }
-  .work__row:hover .work__name{ color:var(--accent); }
+  .work__cell--a{ grid-column:span 7; }
+  .work__cell--b{ grid-column:span 5; }
+  .work__cell--c{ grid-column:span 12; }
+  /* The pair in the top row: 7 columns is 1.41x 5 columns, and 16/9 is 1.42x
+     5/4, so they finish level at every width without a fixed height between
+     them. The third runs the full 12 in a letterbox — narrow enough that the
+     grade stays a strip rather than a field of empty colour behind one mark. */
+  .work__cell--a .work__plate{ --plate-ar:16 / 9; }
+  .work__cell--b .work__plate{ --plate-ar:5 / 4; }
+  .work__cell--c .work__plate{ --plate-ar:32 / 9; }
+
+  .work__tile{ display:block; }
+  .work__plate{ border-radius:var(--radius-lg); transition:transform .5s var(--ease); }
+  .work__tile:hover .work__plate{ transform:translateY(-4px); }
+
+  /* The wordmark sits in the plate, on the grade. The meta sits below it, on
+     the paper — text belongs on the sheet, where it is 16.8:1, not floated over
+     an image where it would depend on a scrim to stay readable. */
+  .work__body{
+    position:absolute; inset:0;
+    display:grid; place-items:center;
+    padding:clamp(24px,4vw,56px);
+  }
 
   /* ---- wordmark ----
      Capped by HEIGHT, never width, so marks of different proportions share one
-     optical size. Deliberately small: these are proof, not billboards, and at
-     full size a row of white logos shouts over the copy next to it.
-     --s trims an individual mark. */
+     optical size. --s trims an individual mark. Larger than the old row, because
+     here the mark is the whole tile rather than one item in a line of four. */
   .work__mark{
-    --mark-h:calc(clamp(18px,2.6vw,40px) * var(--s, 1));
+    --mark-h:calc(clamp(26px,3.6vw,58px) * var(--s, 1));
     position:relative; display:block; width:max-content;
   }
   .work__mark img{
     display:block; height:var(--mark-h); width:auto;
     /* aspect-ratio comes from the file itself (SVG viewBox, PNG header): it
-       reserves the width before the file loads, so the row never jumps. */
+       reserves the width before the file loads, so the tile never jumps. */
     aspect-ratio:var(--ar, auto);
     /* Every supplied mark is white artwork, so brightness() is a colour dial on
-       it: .541 lands #FFF on #8A8A8A (--ink-muted) and .95 lands it on #F2F2F2
-       (--ink). So the mark rests muted and steps forward on hover, which is the
-       same move .work__sector already makes in this row. Black knockouts, like
-       the "S" in the Smart Social tile, stay black either way. */
-    filter:brightness(.541);
+       it. On the grade it rests slightly held back and steps to full white on
+       hover, which is the same move the meta row makes underneath. */
+    filter:brightness(.86);
     transition:filter .45s var(--ease);
   }
-  .work__row:hover .work__mark img{ filter:brightness(.95); }
-
-  .work__line{ display:block; color:var(--ink-muted); margin-top:12px; max-width:52ch; font-size:clamp(13px,1.3vw,16px); }
-  .work__sector{ white-space:nowrap; color:var(--ink-muted); }
-  .work__row:hover .work__sector{ color:var(--ink); }
-  .work__arr{ font-size:22px; color:var(--accent); }
-
-  @media (prefers-reduced-motion: reduce){
-    .work__mark img{ transition:none; }
+  .work__tile:hover .work__mark img{ filter:brightness(1); }
+  .work__name{
+    font-size:clamp(28px,3.6vw,58px); letter-spacing:-.04em; line-height:.94;
+    text-transform:uppercase; text-align:center;
   }
 
+  .work__meta{
+    display:grid; grid-template-columns:1fr auto;
+    align-items:baseline; gap:6px clamp(12px,2vw,28px);
+    padding-top:clamp(14px,1.6vw,20px);
+  }
+  .work__tag{ grid-column:1; color:var(--ink-muted); }
+  .work__line{
+    grid-column:1; align-self:start;
+    color:var(--ink-muted); font-size:clamp(13px,1.3vw,16px); max-width:46ch;
+    transition:color .3s var(--ease);
+  }
+  .work__tile:hover .work__line{ color:var(--ink); }
+  /* The proof line. Full ink where the description is muted: the number is the
+     point of the row, the sentence is its caption. */
+  .work__fact{ grid-column:1; color:var(--ink); margin-top:2px; }
+  .work__arr{ grid-column:2; grid-row:1 / span 3; align-self:center; font-size:20px; color:var(--ink); }
 
-  @media (max-width:760px){
-    .work__row{ grid-template-columns:auto 1fr auto; gap:16px; }
-    .work__sector{ display:none; }
-    /* The height clamp bottoms out at 22px, so a mark stays small here on its
-       own. Width follows the aspect ratio and is never capped: capping it would
-       squash the mark and desync the mask that sits on top of it. */
+  @media (prefers-reduced-motion: reduce){
+    .work__mark img, .work__plate{ transition:none; }
+    .work__tile:hover .work__plate{ transform:none; }
+  }
+
+  @media (max-width:860px){
+    .work__cell--a, .work__cell--b, .work__cell--c{ grid-column:span 12; }
+    /* One column: the paired ratios stop doing anything, so every tile takes
+       the same shape and the section reads as one stack. */
+    .work__plate{ --plate-ar:4 / 3 !important; }
   }
 </style>

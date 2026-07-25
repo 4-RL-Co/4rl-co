@@ -27,11 +27,14 @@ export const articles = [
     author: 'Gabriel Olegário',
     date: '2026-07-16',
     dateLabel: 'Jul 2026',
-    // Covers are drawn, not shot. A screenshot as a cover made this post look
-    // like it came from a different site than the one next to it, and no overlay
-    // fixes that: the fix is that every cover is a graphic built from the "/".
-    cover: '/journal/cover-fork.svg',
-    coverAlt: 'The 4/RL slash, forking: one bar comes down and splits into two.',
+    // Covers are stills from the site's own film, softened, with the mark
+    // centered on top (the overlay lives in CSS where covers render). The
+    // drawn-slash covers retired when the photography arrived.
+    cover: '/journal/cover-reading-log.jpg',
+    coverAlt: 'A luminous goldfish drifting above still water, facing a small figure.',
+    // White line icon centered on the cover. Always about the post: a book
+    // for the reading log, the slash for the manifesto.
+    coverIcon: '/journal/icons/book.svg',
     blocks: [
       { t: 'p', drop: true, html: `The last thing I wrote here ended with a claim: bring the tool method and intent, and it becomes a lever that moves real work.` },
       { t: 'p', html: `That is easy to write in a manifesto. So we went and tested it.` },
@@ -119,16 +122,6 @@ export const articles = [
 
       { t: 'divider' },
 
-      { t: 'h2', id: 'in-english', html: `Why this is in English` },
-      { t: 'p', html: `Fair question, and I'll answer it before someone asks it in the comments.` },
-      { t: 'p', html: `Gume is Portuguese-first and it is going to stay that way. The app is in Portuguese, the catalogue is Portuguese, the README is Portuguese, the issues are answered in Portuguese, and translating it to anything else is explicitly <em>not</em> the priority until the Brazilian version is flawless. Brazilian readers spent fifteen years stuck with a decaying Skoob while every alternative was built for someone else, in someone else's language, around someone else's shelf. Fixing that is the entire point.` },
-      { t: 'p', html: `This page is in English for a different reason.` },
-      { t: 'p', html: `I want the world to see what happens when Brazilians get AI and an open source community in the same room. We are usually cast in this story as the market. The users. The place where the product gets localized last, if it gets localized. The seat at the table nobody assigns.` },
-      { t: 'pull', lime: true, html: `We are not asking for the seat. We're building the table, in the open, under a licence that lets anyone take it.` },
-      { t: 'p', html: `So: the product speaks Portuguese, because it was made for people who read in Portuguese. The invitation speaks English, because I want it read everywhere. Those are not in conflict. That's just knowing who each sentence is for, which happens to be the same rule the whole repo runs on: <strong>Gume talks to readers, GitHub talks to builders, and you never mix them up.</strong>` },
-
-      { t: 'divider' },
-
       { t: 'h2', id: 'invitation', html: `The invitation` },
       { t: 'p', html: `Gume exists to be built by the people who use it. That is the whole premise, and right now it is short of hands.` },
       { t: 'p', html: `<strong>You can contribute without writing a line of code, and today this is the most valuable help there is.</strong> The catalogue came from an open archive and it arrived incomplete: <strong>nearly 266,000 editions with no cover</strong>, thousands with no year and no publisher. That does not fix itself, and it does not need a programmer. It needs someone holding the book.` },
@@ -184,11 +177,13 @@ export const articles = [
     slug: 'the-tool-answered-back',
     title: 'The tool answered back',
     dek: 'The 4/RL manifesto',
-    excerpt: 'The 4/RL manifesto.',
+    excerpt: 'For seventy thousand years our tools waited for us. Now the tool answers back. The 4/RL manifesto, on what changes when powers that belonged to the gods become engineering, and what we intend to do with them.',
     author: 'Gabriel Olegário',
     date: '2026-07-07',
     dateLabel: 'Jul 2026',
-    cover: '/cover-slash.svg', // shown on the /journal list card (16:9)
+    cover: '/journal/cover-tool-answered.jpg',
+    coverAlt: 'A figure from behind, facing an arena of streaking machine lights.',
+    coverIcon: '/journal/icons/slash.svg',
     flagship: true,
     blocks: [
       { t: 'p', drop: true, html: `For seventy thousand years, our tools waited for us. The axe extended the arm, the wheel the leg, writing the memory. They stayed inert until a hand moved them. The hammer waited to be swung. The book kept its pages exactly as they were written.` },

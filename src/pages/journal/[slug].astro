@@ -3,6 +3,12 @@ import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import { Image } from 'astro:assets';
 import { articles } from '../../data/journal.js';
+import { getLocale, homePath } from '../../i18n/index.js';
+import { getPages } from '../../i18n/pages.js';
+import { postBlocks } from '../../i18n/posts.js';
+
+const locale = getLocale(Astro);
+const P = getPages(locale);
 
 // Figures are imported here, not in the data file, so astro:assets can optimise
 // them. A block references one by key; an unknown key renders nothing rather
@@ -20,11 +26,22 @@ export function getStaticPaths() {
   return articles.map((a) => ({ params: { slug: a.slug }, props: { article: a } }));
 }
 const { article } = Astro.props;
+// Localized title, dek and excerpt; the BODY stays in its original English —
+// long-form gets translated as reviewed batches, and the header says so in
+// the reader's language (P.chrome.origNote).
+const jp = P.journalPosts[article.slug] ?? {};
+const artTitle = jp.title ?? article.title;
+const artDek = jp.dek ?? article.dek;
+// Fully translated bodies live in posts.js; a locale without one falls back
+// to the English blocks with the origin note (which, with all four shipped,
+// is now a safety net rather than a state).
+const blocks = postBlocks[locale]?.[article.slug] ?? article.blocks;
+const translated = Boolean(postBlocks[locale]?.[article.slug]) || locale === 'en';
 
 // auto reading time (~200 wpm). Counts every block that carries prose, so a
 // long article stops being reported as a short one just because its words sit
 // in headings and lists rather than paragraphs.
-const words = article.blocks
+const words = blocks
   .flatMap((b) => [b.html, b.caption, ...(b.items || [])])
   .filter(Boolean)
   .join(' ')
@@ -37,9 +54,9 @@ const read = Math.max(1, Math.round(words / 200)) + ' min';
 const site = 'https://www.4real.ventures';
 const url = `${site}/journal/${article.slug}/`;
 const e = encodeURIComponent;
-const shareX = `https://twitter.com/intent/tweet?text=${e(article.title)}&url=${e(url)}`;
+const shareX = `https://twitter.com/intent/tweet?text=${e(artTitle)}&url=${e(url)}`;
 const shareLI = `https://www.linkedin.com/sharing/share-offsite/?url=${e(url)}`;
-const shareMail = `mailto:?subject=${e(article.title)}&body=${e(url)}`;
+const shareMail = `mailto:?subject=${e(artTitle)}&body=${e(url)}`;
 
 // Article structured data (rich results / better indexing)
 const articleSchema = {
@@ -60,7 +77,7 @@ const articleSchema = {
   url,
 };
 ---
-<Base title={`${article.title} · 4/RL Co. Journal`} description={article.dek} jsonLd={articleSchema}>
+<Base title={`${artTitle} · 4/RL Co. Journal`} description={artDek} jsonLd={articleSchema}>
   <Nav />
   <div class="art-progress" id="artProgress" aria-hidden="true"></div>
 
@@ -68,8 +85,9 @@ const articleSchema = {
     <div class="wrap">
       <header class="art__head">
         <p class="mono art__kicker reveal">Journal <span class="slash">/</span> {article.kicker ?? 'Manifesto'}</p>
-        <h1 class="art__title display reveal" data-d="1">{article.title}</h1>
-        <p class="art__dek reveal" data-d="1">{article.dek}</p>
+        <h1 class="art__title display reveal" data-d="1">{artTitle}</h1>
+        <p class="art__dek reveal" data-d="1">{artDek}</p>
+        {!translated && <p class="art__orig mono reveal" data-d="2">{P.chrome.origNote}</p>}
         <div class="art__byline mono reveal" data-d="2">
           <span class="art__by-name">{article.author}</span>
           <span class="art__by-date">{article.dateLabel} · {read}</span>
@@ -87,7 +105,7 @@ const articleSchema = {
         </aside>
 
         <article class="art__body">
-          {article.blocks.map((b) =>
+          {blocks.map((b) =>
             b.t === 'p' ? (
               <p class={'art__p reveal' + (b.drop ? ' has-drop' : '')} set:html={b.html} />
             ) : b.t === 'h2' ? (
@@ -163,6 +181,7 @@ const articleSchema = {
   .art__kicker{ margin-bottom:clamp(20px,4vh,44px); }
   .art__title{ text-transform:uppercase; font-size:clamp(46px,10.5vw,148px); letter-spacing:-.05em; line-height:.9; }
   .art__dek{ margin-top:22px; color:var(--ink-muted); font-size:clamp(16px,1.7vw,21px); max-width:44ch; }
+  .art__orig{ margin-top:14px; color:var(--ink-muted); font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
   .art__byline{
     margin-top:auto; display:flex; align-items:flex-end; justify-content:space-between;
     gap:16px 32px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:24px;

@@ -28,9 +28,9 @@ across influence, education, applied AI, and film.
 
 ## The studio
 
-The 4/RL Co. website — an editorial, dark-mode hub for the studio. It carries the thesis, the ventures we build and operate, the press, and a native Journal.
+The 4/RL Co. website — an editorial hub for the studio. It carries the thesis, the ventures we build and operate, the press, and a native Journal.
 
-Design language: near-black `#0A0A0B` with a single surgical accent — **electric lime** `#C6FF3A` — oversized Space Grotesk display type, and the `/` motif throughout. Built with [Astro](https://astro.build) as a static site: no client framework, self-hosted fonts, inlined CSS, hardened headers.
+Design language: two surfaces, paper `#F4F4F4` and near-black `#0A0A0B`, alternating in blocks down the page; a single surgical accent — **electric lime** `#C6FF3A` — that is a colour on near-black and a fill-only signature on paper, because lime on paper is 1.07:1; oversized Space Grotesk display type; and the `/` motif throughout. Colour beyond that comes from graded imagery, never from UI tokens. Built with [Astro](https://astro.build) as a static site: no client framework, self-hosted fonts, inlined CSS, hardened headers. The reasoning is in [`ai/DECISIONS.md`](ai/DECISIONS.md).
 
 ## Ventures
 
@@ -38,7 +38,6 @@ Design language: near-black `#0A0A0B` with a single surgical accent — **electr
 | --- | --- |
 | **[Smart Social](https://smtsocial.com.br)** | Influence and media network. |
 | **[LabEpi](https://laboratoriodeepidemiologia.com)** | Teaching epidemiology and the scientific method. |
-| **[D.Lab Experts](https://dlabexperts.com)** | AI put to work where it moves the numbers. |
 | **[M1m1c Box](https://www.youtube.com/@m1m1cbox)** | Cinematic storytelling, made with AI. |
 
 ## Built with
@@ -62,14 +61,21 @@ Measured, not claimed — [PageSpeed Insights](https://pagespeed.web.dev/analysi
 .
 ├── src/
 │   ├── layouts/Base.astro   # head, meta/OG, JSON-LD, CSP fallback, preloader, cursor, reveals
-│   ├── components/          # Nav, Hero, Manifesto, Work, News, Footer
+│   ├── components/          # Nav, Hero, Capabilities, Work, OpenSource, Manifesto, Journal, News, FAQ, Footer
 │   ├── pages/
 │   │   ├── index.astro      # home
+│   │   ├── studio.astro     # the studio at page length + visible FAQ
+│   │   ├── open-source.astro# the public work at page length
+│   │   ├── work/[slug].astro# one case page per venture (content from ventures.js)
 │   │   ├── 404.astro        # branded not-found
 │   │   └── journal/         # list + [slug] article renderer
+│   ├── assets/              # stills run through astro:assets — hero/ and ventures/ each document their contract
 │   ├── data/                # ventures, news, journal (content as data)
-│   └── styles/global.css    # design system / tokens / metric-matched font fallbacks
-├── public/                  # favicons, mark, OG image, robots, sitemap*, _headers, security.txt
+│   └── styles/global.css    # design system / surface tokens / metric-matched font fallbacks
+├── ai/DECISIONS.md          # what we chose and what it cost — the site links to it by name
+├── public/                  # favicons, marks, wordmark, OG image, robots, sitemap*, _headers, security.txt
+│   ├── ventures/            # venture wordmarks (flat artwork, served as-is)
+│   └── media/               # video — astro:assets doesn't process it, so encode before it lands here
 ├── vercel.json              # security headers + apex→www redirect
 ├── .githooks/pre-commit     # secret guard
 └── .env.example             # documents public analytics tokens (values never committed)

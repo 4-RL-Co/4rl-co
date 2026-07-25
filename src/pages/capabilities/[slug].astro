@@ -1,0 +1,179 @@
+---
+// One page per capability: /capabilities/<slug>. The home cards point here.
+// Structure mirrors the venture case pages, one register calmer: no plate
+// band (capabilities have no photography of their own, and borrowing a
+// venture's frame would say the wrong thing), the ghost numeral carries the
+// visual instead — the same Michroma numeral the home cards wear.
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { capabilities } from '../../data/capabilities.js';
+import { ventures } from '../../data/ventures.js';
+import { getLocale, getDict, homePath } from '../../i18n/index.js';
+import { getPages, localePathFor } from '../../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+const P = getPages(locale);
+const C = P.chrome;
+const lp = (p) => localePathFor(locale, p);
+
+export function getStaticPaths() {
+  return capabilities.map((c) => ({ params: { slug: c.slug }, props: { cap: c } }));
+}
+
+const { cap: c } = Astro.props;
+const site = 'https://www.4real.ventures';
+const cc = { ...c, ...(P.caps[c.slug] ?? {}) };
+
+const i = capabilities.findIndex((x) => x.slug === c.slug);
+const next = capabilities[(i + 1) % capabilities.length];
+
+const title = `${cc.title} · 4/RL Co.`;
+const description = cc.lede;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${site}/capabilities/${c.slug}/#webpage`,
+    url: `${site}/capabilities/${c.slug}/`,
+    name: title,
+    description,
+    isPartOf: { '@id': `${site}/#website` },
+    about: { '@id': `${site}/#organization` },
+    inLanguage: locale,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Capabilities', item: `${site}/#capabilities` },
+      { '@type': 'ListItem', position: 2, name: c.title, item: `${site}/capabilities/${c.slug}/` },
+    ],
+  },
+];
+---
+<Base title={title} description={description} twitterDesc={c.line} jsonLd={jsonLd}>
+  <Nav />
+  <main class="cp">
+    <header class="surface surface--dark surface--deep cp__head crop">
+      <span class="cp__ghost" aria-hidden="true">{c.idx}</span>
+      <div class="wrap">
+        <p class="cp__crumb mono reveal">
+          <a href={`${homePath(locale)}#capabilities`}>{C.capsCrumb}</a> <span class="slash">/</span> {c.idx}
+          <span class="pill cp__tag">{cc.tag}</span>
+        </p>
+        <h1 class="cp__title display">
+          <span class="tline"><span class="tline__in" style="--tl:0">{cc.title}</span></span>
+        </h1>
+        <p class="cp__lede reveal" data-d="1">{cc.lede}</p>
+      </div>
+    </header>
+
+    <section class="surface surface--dark surface--deep cp__body">
+      <div class="wrap cp__grid">
+        <div class="cp__story">
+          {cc.story.map((p, n) => (
+            <p class="reveal" data-d={String(n + 1)}>{p}</p>
+          ))}
+        </div>
+
+        <aside class="cp__aside">
+          <p class="caption cp__aside-label reveal">{C.onRecord}</p>
+          <ul class="cp__proof">
+            {cc.proof.map((item, n) => (
+              <li class="reveal" data-d={String((n % 3) + 1)}>
+                <span class="slash" aria-hidden="true">/</span> {item}
+              </li>
+            ))}
+          </ul>
+          <dl class="cp__specs reveal" data-d="3">
+            <div><dt class="caption">{C.lead}</dt><dd>{C.leadValue}</dd></div>
+            <div><dt class="caption">{C.runsInside}</dt><dd class="cp__runs">{ventures.map((v, n) => (<><a href={lp(`/work/${v.slug}`)}>{v.name}</a>{n < ventures.length - 1 ? ', ' : ''}</>))}</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <section class="surface surface--dark surface--deep cp__close">
+      <div class="wrap cp__close-row">
+        <a class="cp__next display reveal" href={lp(`/capabilities/${next.slug}`)}>
+          <span class="caption cp__next-label">{C.nextCap}</span>
+          {P.caps[next.slug]?.title ?? next.title} <span class="arr">→</span>
+        </a>
+        <div class="reveal" data-d="1">
+          <p class="cp__close-line">{C.needChain}</p>
+          <a class="pill pill--solid" href={`${homePath(locale)}#contact`}>{C.talk} <span class="slash">/</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .cp__head{
+    position:relative; overflow:hidden;
+    padding-top:calc(var(--nav-h) + clamp(40px,8vh,90px)); padding-bottom:clamp(40px,6vh,72px);
+  }
+  /* the section's own Michroma numeral, clipped by the header edge */
+  .cp__ghost{
+    position:absolute; top:-.1em; right:-.03em;
+    font-family:var(--font-tech); font-weight:400;
+    font-size:clamp(180px,26vw,420px); line-height:1;
+    color:rgba(255,255,255,.04);
+    pointer-events:none; user-select:none;
+  }
+  .cp__crumb{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:clamp(20px,3vh,36px); }
+  .cp__crumb a{ color:var(--ink-muted); transition:color .25s var(--ease); }
+  .cp__crumb a:hover{ color:var(--ink); }
+  .cp__tag{ margin-left:6px; }
+  .cp__title{
+    position:relative;
+    text-transform:uppercase;
+    font-size:clamp(34px,6.8vw,104px); letter-spacing:-.045em; line-height:.94;
+  }
+  .cp__lede{
+    margin-top:clamp(18px,3vh,32px);
+    color:var(--ink-muted); font-size:clamp(16px,1.7vw,22px); max-width:54ch;
+  }
+
+  .cp__body{ padding-bottom:clamp(64px,10vh,130px); }
+  .cp__grid{
+    display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+    gap:clamp(32px,6vw,110px); align-items:start;
+  }
+  .cp__story p{
+    color:var(--ink); font-size:clamp(16px,1.6vw,21px); line-height:1.6;
+    max-width:58ch;
+  }
+  .cp__story p + p{ margin-top:1.2em; }
+
+  .cp__aside-label{ padding-bottom:14px; border-bottom:1px solid var(--line); }
+  .cp__proof{ list-style:none; }
+  .cp__proof li{
+    padding:clamp(12px,1.6vh,16px) 0; border-bottom:1px solid var(--line);
+    color:var(--ink-muted); font-size:clamp(13px,1.3vw,15px); line-height:1.45;
+  }
+  .cp__specs{ margin-top:clamp(22px,3vh,32px); display:grid; gap:14px; }
+  .cp__specs div{ display:grid; gap:4px; }
+  .cp__specs dd{ color:var(--ink); font-size:clamp(13px,1.3vw,15px); }
+  .cp__runs a{ border-bottom:1px solid var(--line); transition:border-color .25s var(--ease); }
+  .cp__runs a:hover{ border-color:var(--ink); }
+
+  .cp__close{ padding:clamp(56px,9vh,100px) 0; }
+  .cp__close-row{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:clamp(24px,4vw,64px); flex-wrap:wrap;
+  }
+  .cp__next{
+    text-transform:uppercase; font-size:clamp(24px,4vw,56px);
+    letter-spacing:-.04em; line-height:1; transition:color .3s var(--ease);
+  }
+  .cp__next:hover{ color:var(--accent); }
+  .cp__next-label{ display:block; margin-bottom:12px; }
+  .cp__close-line{ color:var(--ink-muted); margin-bottom:14px; font-size:clamp(14px,1.4vw,17px); }
+
+  @media (max-width:860px){
+    .cp__grid{ grid-template-columns:1fr; }
+  }
+</style>

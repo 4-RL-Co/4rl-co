@@ -1,0 +1,232 @@
+---
+// /studio — the studio explained at page length: thesis, method, founder, and
+// the questions people actually ask. The FAQ that lives invisibly as JSON-LD on
+// the home page becomes visible content here, from the same data file, and
+// deliberately without a second FAQPage block: the schema exists once, the
+// humans get the answers here.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import { faqs as faqsEn } from '../data/faq.js';
+import { ventures } from '../data/ventures.js';
+import { getLocale, getDict, homePath } from '../i18n/index.js';
+import { getPages, localePathFor } from '../i18n/pages.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
+const P = getPages(locale);
+const lp = (p) => localePathFor(locale, p);
+const faqs = P.faqs ?? faqsEn;
+// EN keeps its authored long-form inline; other locales read the dictionary.
+const S = P.studio;
+
+const site = 'https://www.4real.ventures';
+const title = S?.title ?? 'The Studio · 4/RL Co.';
+const description = S?.desc ??
+  'What 4/RL Co. is and how it works: an independent AI venture studio in São Paulo that starts companies and runs them, across influence, education, applied AI and film.';
+
+const pillarsSlugs = ['operations-growth', 'data-applied-ai', 'creative-content'];
+const pillars = [
+  {
+    idx: '01',
+    tag: 'Operate',
+    title: 'Operations & Growth',
+    line: 'Strategy, growth and commercial, powered by AI. The unglamorous half of every venture, done in-house because it is where ventures live or die.',
+  },
+  {
+    idx: '02',
+    tag: 'Apply',
+    title: 'Data & Applied AI',
+    line: 'Turning data and AI into decisions that move the numbers. Models and tooling built for each venture, under the operation rather than on top of it.',
+  },
+  {
+    idx: '03',
+    tag: 'Create',
+    title: 'Creative & Content',
+    line: 'AI-native creative, from concept to production. Directed by people, produced with machines, held to the standard of the craft.',
+  },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': `${site}/studio/#webpage`,
+    url: `${site}/studio/`,
+    name: title,
+    description,
+    isPartOf: { '@id': `${site}/#website` },
+    about: { '@id': `${site}/#organization` },
+    inLanguage: 'en',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': `${site}/studio/#founder`,
+    name: 'Gabriel Olegário',
+    jobTitle: 'Founder',
+    worksFor: { '@id': `${site}/#organization` },
+    description: 'Advertiser and builder. Sets the direction and ships the work, from São Paulo.',
+    memberOf: { '@type': 'Organization', name: 'ForbesBLK' },
+    sameAs: [
+      'https://www.linkedin.com/company/4rl-co/',
+      'https://github.com/4-RL-Co',
+      'https://t.me/olegas4real',
+    ],
+  },
+];
+---
+<Base title={title} description={description} twitterDesc="An independent AI venture studio. We start companies and run them." jsonLd={jsonLd}>
+  <Nav />
+  <main class="st">
+    <header class="surface surface--dark surface--deep st__head">
+      <div class="wrap">
+        <p class="st__kicker mono reveal">{S?.kicker ?? 'The studio'} <span class="slash">/</span> São Paulo <span class="coords st__coords" aria-hidden="true">23.5505° S / 46.6333° W</span></p>
+        <h1 class="st__title display">
+          <span class="tline"><span class="tline__in" style="--tl:0" set:html={S?.h1?.[0] ?? 'We start companies'} /></span>
+          <span class="tline"><span class="tline__in" style="--tl:1" set:html={S?.h1?.[1] ?? 'and we <span class="serif">run</span> them<span class="slash">.</span>'} /></span>
+        </h1>
+        <p class="st__lede reveal" data-d="2">
+          {S?.lede ?? '4/RL is an independent AI venture studio. Every venture here is ours: we own the operation, we hold it to the numbers, and we stay for the long haul. AI is the tool. The improvement is the point.'}
+        </p>
+      </div>
+    </header>
+
+    <section class="surface surface--dark surface--deep st__how" aria-labelledby="st-how">
+      <div class="wrap">
+        <p class="seclabel reveal"><span class="n">01</span> <span class="slash">/</span> {S?.howLabel ?? 'How it works'}</p>
+        <h2 class="st__h2 display reveal" id="st-how" set:html={S?.howTitle ?? t.cap.title} />
+        <ol class="st__pillars">
+          {pillars.map((p, i) => (
+            <li class="st__pillar reveal" data-d={String(i + 1)}>
+              <span class="st__pillar-idx mono">{p.idx}</span>
+              <div>
+                <h3 class="st__pillar-name">{P.caps[pillarsSlugs[i]]?.title ?? p.title}</h3>
+                <p class="st__pillar-line">{locale === 'en' ? p.line : (t.cap.cards[pillarsSlugs[i]]?.line ?? p.line)}</p>
+              </div>
+              <span class="pill st__pillar-tag">{P.caps[pillarsSlugs[i]]?.tag ?? p.tag}</span>
+            </li>
+          ))}
+        </ol>
+        {/* One line on purpose: Astro keeps the template's indentation as text
+            nodes, and a wrapped map here ships "Smart Social ,  LabEpi" with
+            stray spaces around every separator. */}
+        <p class="st__ventures-line reveal">{S?.chainLine ?? 'The chain runs inside three ventures today: '}{ventures.map((v, i) => (<><a class="st__vlink" href={lp(`/work/${v.slug}`)}>{v.name}</a>{i < ventures.length - 1 ? ', ' : '.'}</>))}</p>
+      </div>
+    </section>
+
+    <section class="surface surface--dark surface--deep st__who" aria-labelledby="st-who">
+      <div class="wrap">
+        <p class="seclabel reveal"><span class="n">02</span> <span class="slash">/</span> {S?.whoLabel ?? "Who's behind it"}</p>
+        <div class="st__who-grid">
+          <h2 class="st__h2 display reveal" id="st-who" data-d="1" set:html={S?.whoTitle ?? 'Direction and shipping, <span class="hl">same person</span><span class="slash">.</span>'} />
+          <div class="reveal" data-d="2">
+            <p class="st__who-body" set:html={S?.whoBody ?? '<span class="st__em">Gabriel Olegário</span>, advertiser and builder, member of <span class="st__em">ForbesBLK</span>. He sets the direction and ships the work, from São Paulo. The studio stays deliberately small: decisions travel one desk, and what gets promised is what gets built.'} />
+            <a class="pill st__who-cta" href={`${homePath(locale)}#contact`}>{S?.whoCta ?? 'Get in touch'} <span class="arr">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="surface surface--dark surface--deep st__faq" aria-labelledby="st-faq">
+      <div class="wrap">
+        <p class="seclabel reveal"><span class="n">03</span> <span class="slash">/</span> {S?.faqLabel ?? 'Questions'}</p>
+        <h2 class="st__h2 display reveal" id="st-faq" set:html={S?.faqTitle ?? 'Asked and <span class="serif">answered</span><span class="slash">.</span>'} />
+        <dl class="st__qa">
+          {faqs.map((f, i) => (
+            <div class="st__qa-item reveal" data-d={String((i % 3) + 1)}>
+              <dt class="st__q">{f.q}</dt>
+              <dd class="st__a">{f.a}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+
+    <section class="surface surface--dark surface--deep st__close">
+      <div class="wrap st__close-row">
+        <a class="st__close-big display reveal" href={`${homePath(locale)}#contact`} set:html={S?.closeBig ?? 'Let\'s <span class="serif">build</span> something <span class="hl">real</span><span class="slash">.</span>'} />
+        <a class="pill pill--solid reveal" data-d="1" href="mailto:olegas@4real.ventures">olegas@4real.ventures <span class="slash">/</span></a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .st__head{ padding-top:calc(var(--nav-h) + clamp(40px,8vh,90px)); padding-bottom:clamp(48px,8vh,100px); }
+  .st__kicker{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:clamp(20px,3vh,36px); }
+  .st__coords{ margin-left:auto; opacity:.72; }
+  .st__title{
+    text-transform:uppercase;
+    font-size:clamp(36px,7.6vw,124px); letter-spacing:-.05em; line-height:.93;
+  }
+  .st__lede{
+    margin-top:clamp(20px,3.5vh,36px);
+    color:var(--ink-muted); font-size:clamp(16px,1.7vw,22px); max-width:58ch;
+  }
+
+  .st__h2{
+    text-transform:uppercase;
+    font-size:clamp(26px,4.2vw,64px); letter-spacing:-.04em; line-height:1;
+    max-width:22ch;
+  }
+
+  .st__how{ padding-bottom:clamp(64px,10vh,130px); }
+  .st__pillars{ list-style:none; margin-top:clamp(36px,6vh,72px); }
+  .st__pillar{
+    display:grid; grid-template-columns:auto minmax(0,1fr) auto;
+    gap:clamp(18px,3.4vw,56px); align-items:start;
+    padding:clamp(22px,3vw,36px) 0; border-top:1px solid var(--line);
+  }
+  .st__pillars li:last-child{ border-bottom:1px solid var(--line); }
+  .st__pillar-idx{ color:var(--ink-muted); padding-top:.45em; }
+  .st__pillar-name{
+    font-family:var(--font-display); font-weight:700; text-transform:uppercase;
+    font-size:clamp(20px,2.6vw,36px); letter-spacing:-.03em; line-height:1;
+  }
+  .st__pillar-line{ margin-top:10px; color:var(--ink-muted); font-size:clamp(13px,1.35vw,16px); max-width:56ch; }
+  .st__pillar-tag{ align-self:center; }
+  .st__pillar-tag:hover{ border-color:var(--line); color:var(--ink); }
+
+  .st__ventures-line{ margin-top:clamp(24px,4vh,40px); color:var(--ink-muted); font-size:clamp(14px,1.4vw,17px); }
+  .st__vlink{ color:var(--ink); border-bottom:1px solid var(--line); transition:border-color .25s var(--ease); }
+  .st__vlink:hover{ border-color:var(--ink); }
+
+  .st__who{ padding:clamp(64px,10vh,130px) 0; }
+  .st__who-grid{
+    display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);
+    gap:clamp(28px,5vw,90px); align-items:start;
+  }
+  .st__who-body{ color:var(--ink-muted); font-size:clamp(15px,1.5vw,19px); max-width:46ch; }
+  .st__em{ color:var(--ink); font-weight:600; }
+  .st__who-cta{ margin-top:24px; }
+
+  .st__faq{ padding:clamp(64px,10vh,130px) 0; }
+  .st__qa{ margin-top:clamp(36px,6vh,64px); columns:2; column-gap:clamp(28px,4vw,72px); }
+  .st__qa-item{
+    break-inside:avoid; padding:clamp(18px,2.4vh,26px) 0;
+    border-top:1px solid var(--line);
+  }
+  .st__q{
+    font-family:var(--font-display); font-weight:700;
+    font-size:clamp(16px,1.7vw,21px); letter-spacing:-.02em; line-height:1.2;
+  }
+  .st__a{ margin-top:10px; color:var(--ink-muted); font-size:clamp(13px,1.35vw,16px); line-height:1.55; max-width:60ch; }
+
+  .st__close{ padding:clamp(64px,10vh,120px) 0; }
+  .st__close-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:clamp(24px,4vw,64px); flex-wrap:wrap;
+  }
+  .st__close-big{
+    text-transform:uppercase; font-size:clamp(28px,4.8vw,68px);
+    letter-spacing:-.045em; line-height:.95; max-width:14ch;
+    transition:opacity .3s var(--ease);
+  }
+  .st__close-big:hover{ opacity:.75; }
+
+  @media (max-width:860px){
+    .st__who-grid{ grid-template-columns:1fr; }
+    .st__qa{ columns:1; }
+    .st__coords{ margin-left:0; width:100%; }
+  }
+</style>

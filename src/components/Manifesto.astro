@@ -1,32 +1,32 @@
 ---
 // Thesis + who's behind it.
+import { getLocale, getDict } from '../i18n/index.js';
+
+const locale = getLocale(Astro);
+const t = getDict(locale);
 ---
-<section class="mf" id="about">
+<section class="sheetwrap" id="about">
+  <div class="mf surface surface--dark sheet">
   <div class="wrap">
-    <p class="seclabel reveal"><span class="n">05</span> <span class="slash">/</span> Manifesto</p>
+    <p class="seclabel reveal"><span class="n">04</span> <span class="slash">/</span> {t.mf.label}</p>
 
     <h2 class="mf__title display reveal" data-d="1">
-      <span class="mf__lede">Everything we build passes one filter: it's <span class="hl">real</span> and it <span class="serif">improves</span> something.</span>
-      <span class="mf__punch">AI is the tool <span class="slash">/</span> not the hype.</span>
+      <span class="mf__lede" set:html={t.mf.lede} />
+      <span class="mf__punch" set:html={t.mf.punch} />
     </h2>
 
     <div class="mf__grid">
       <div class="reveal" data-d="1">
-        <p class="mono mf__label">Principle</p>
-        <p class="mf__body">
-          <span class="hl">We don't sell a service</span>. We own our ventures
-          and stay for the long haul.
-        </p>
+        <p class="mono mf__label">{t.mf.p1l}</p>
+        <p class="mf__body" set:html={t.mf.p1} />
       </div>
       <div class="reveal" data-d="2">
-        <p class="mono mf__label">Who's behind it</p>
-        <p class="mf__body">
-          <span class="mf__em">Gabriel Olegário</span>, advertiser and builder.
-          He sets the direction and ships the work, from São Paulo.
-        </p>
-        <a class="pill mf__cta" href="#contact">Get in touch <span class="arr">↗</span></a>
+        <p class="mono mf__label">{t.mf.p2l}</p>
+        <p class="mf__body" set:html={t.mf.p2} />
+        <a class="pill mf__cta" href="#contact">{t.mf.cta} <span class="arr">↗</span></a>
       </div>
     </div>
+  </div>
   </div>
 </section>
 
